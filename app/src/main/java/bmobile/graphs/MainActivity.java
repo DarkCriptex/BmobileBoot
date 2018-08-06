@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-                // Toast.makeText(MainActivity.this, ""+ position, Toast.LENGTH_SHORT).show();
+                //  Toast.makeText(MainActivity.this, ""+ position, Toast.LENGTH_SHORT).show();
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 ChartFragment chartFragment = new ChartFragment();
