@@ -5,11 +5,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -23,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,13 +35,27 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.Manifest.permission.READ_CONTACTS;
+import bmobile.graphs.LoginInterface.LoginBody;
+import bmobile.graphs.LoginInterface.LoginInterface;
+import bmobile.graphs.LoginInterface.User;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
+    private Retrofit restAdapter;
+    private LoginInterface loginInterface;
+
+    public static String URL_ENDPOINTS = "url_endpoints";
+    public static String  AWTENANTCODE_ENDPOINTS = "awtenantcode_endpoints";
+    public static String SERVER_PASSWORD_ENDPOINTS = "serverpassword_endpoints";
+    public static String SERVER_USER_ENDPOINTS = "serveruser_endpoints";
     /**
      * Id to identity READ_CONTACTS permission request.
      */
@@ -62,6 +74,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private UserLoginTask mAuthTask = null;
 
+
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -72,6 +85,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        //Creamos conexion al servicio Rest
+        restAdapter =  new Retrofit.Builder()
+                .baseUrl(LoginInterface.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        loginInterface = restAdapter.create(LoginInterface.class);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         //populateAutoComplete();
@@ -108,35 +129,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
     }
 
-    /*private void populateAutoComplete() {
-        if (!mayRequestNetworkState()) {
-            return;
-        }
 
-        getLoaderManager().initLoader(0, null, this);
-    }*/
-
-    /*private boolean mayRequestNetworkState() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{Manifest.permission.ACCESS_NETWORK_STATE}, REQUEST_READ_CONTACS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_READ_CONTACS);
-        }
-        return false;
-    }*/
 
     /**
      * Callback received when a permissions request has been completed.
@@ -199,8 +192,47 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+           // mAuthTask = new UserLoginTask(email, password);
+           // mAuthTask.execute((Void) null);
+
+            Call<List<User>> loginCall = loginInterface.login(new LoginBody(email, password));
+            loginCall.enqueue(new Callback<List<User>>() {
+                @Override
+                public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                    showProgress(false);
+                    Log.d("Response :", "" + response.code());
+                    if(response.code()== 200){
+                        if(response.body().get(0).getName_user().isEmpty()){
+                            //El usuario es incorrecto o no esta registrado
+                            Toast.makeText(LoginActivity.this, "El usuario no esta registrado", Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            //El usuario esta registrado
+                            //Comprobar si cuenta con todos los datos
+                            if (response.body().get(0).getUrl_endpoints().isEmpty()|| response.body().get(0).getAwtenantcode_endpoints().isEmpty()
+                                    ||response.body().get(0).getServerpassword_endpoints().isEmpty()|| response.body().get(0).getServeruser_endpoints().isEmpty()){
+                                //Si no los tiene, Ir a pantalla para llenar los campos
+                               /* Bundle bundle = new Bundle();
+                                bundle.putString(response.body().get(0).getUrl_endpoints(), URL_ENDPOINTS);
+                                bundle.putString(response.body().get(0).getAwtenantcode_endpoints(), AWTENANTCODE_ENDPOINTS);
+                                bundle.putString(response.body().get(0).getServerpassword_endpoints(), SERVER_PASSWORD_ENDPOINTS);
+                                bundle.putString(response.body().get(0).getServeruser_endpoints(), SERVER_USER_ENDPOINTS);*/
+
+                            }
+                            else {
+                                //Si los tiene Ir a menu
+                                startAvtivictyOnSuccesLogin();
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<User>> call, Throwable t) {
+                    showProgress(false);
+                    Log.d("Error :", "" + t.getMessage());
+                }
+            });
         }
     }
 
