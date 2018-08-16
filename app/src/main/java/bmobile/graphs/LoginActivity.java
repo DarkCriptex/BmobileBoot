@@ -96,10 +96,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         loginInterface = restAdapter.create(LoginInterface.class);
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView = findViewById(R.id.email);
         //populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.serverpassword_endpoints);
+        mPasswordView = findViewById(R.id.serverpassword_endpoints);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -244,6 +244,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 public void onFailure(Call<User<Error>> call, Throwable t) {
                     showProgress(false);
                     Log.i("Error", " " + t.getMessage());
+                    Toast.makeText(LoginActivity.this, "Ha ocurrido un error, intente más tarde", Toast.LENGTH_SHORT).show();
                 }
             });
 
