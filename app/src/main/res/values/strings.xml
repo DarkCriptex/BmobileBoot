@@ -14,6 +14,11 @@
         completions."
     </string>
     <string name="error_network">Network Error</string>
+    <string name="url_endpoints">URL endpoint</string>
+    <string name="awtenantcode_endpoints">Awtenand code </string>
+    <string name="serverpassword_endpoints">Server  password</string>
+    <string name="serveruser_endpoints">Server user</string>
+    <string name="Enviar">Enviar</string>
 
     <string-array name="planets_array">
         <item>Server 1</item>

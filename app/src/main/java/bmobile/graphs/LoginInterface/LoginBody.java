@@ -1,30 +1,33 @@
 package bmobile.graphs.LoginInterface;
 
 public class LoginBody {
-    private String user;
-    private String password;
+    private String username;
+    private String pass;
 
-
-    public LoginBody(String user, String password) {
-        this.user = user;
-        this.password = password;
+    public String getUsername() {
+        return username;
     }
 
-    public String getUser() {
-        return user;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public String getPass() {
+        return pass;
     }
 
-    public String getPassword() {
-        return password;
+    public void setPass(String pass) {
+        this.pass = pass;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+
+
+    public LoginBody(String username, String pass) {
+        this.username = username;
+        this.pass = pass;
     }
+
+
 
 
 }

@@ -32,6 +32,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +50,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
+    public static final int SUCCESFUL_RESPONSE_CODE = 200;
     private Retrofit restAdapter;
     private LoginInterface loginInterface;
 
@@ -131,18 +133,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
 
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    /*@Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
-        }
-    }*/
+
 
 
     /**
@@ -195,13 +186,48 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
            // mAuthTask = new UserLoginTask(email, password);
            // mAuthTask.execute((Void) null);
 
-            Call<List<User>> loginCall = loginInterface.login(new LoginBody(email, password));
-            loginCall.enqueue(new Callback<List<User>>() {
+            Call<User> loginCall = loginInterface.login(new LoginBody(email, password));
+            loginCall.enqueue(new Callback<User>() {
                 @Override
-                public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                public void onResponse(Call<User> call, Response<User> response) {
+                    Log.d("Respuesta :",""+ response.body() + " Respuesta " +  response.body().toString());
+
                     showProgress(false);
-                    Log.d("Response :", "" + response.code());
-                    if(response.code()== 200){
+                    if(response.code()== SUCCESFUL_RESPONSE_CODE && response.isSuccessful()){
+                        User user;
+                        user = response.body();
+                            //El usuario esta registrado
+                            //Comprobar si cuenta con todos los datos
+                            if (user.getUrlEndpoints().isEmpty()|| user.getAwtenantcodeEndpoints().isEmpty()
+                                    ||user.getServerpasswordEndpoints().isEmpty()|| user.getServeruserEndpoints().isEmpty()){
+                                //Si no los tiene, Ir a pantalla para llenar los campos
+                                Intent intent = new Intent(LoginActivity.this, UserEndpointsActivity.class);
+                                intent.putExtra(user.getUrlEndpoints(), URL_ENDPOINTS);
+                                intent.putExtra(user.getAwtenantcodeEndpoints(), AWTENANTCODE_ENDPOINTS);
+                                intent.putExtra(user.getServerpasswordEndpoints(), SERVER_PASSWORD_ENDPOINTS);
+                                intent.putExtra(user.getServeruserEndpoints(), SERVER_USER_ENDPOINTS);
+                                startActivity(intent);
+                            }
+                            else {
+                                //Si los tiene Ir a menu
+                                startAvtivictyOnSuccesLogin();
+                            }
+                        }
+                        else {
+                            Log.i("Respuesta vacia", " " + response.body());
+                            showProgress(false);
+                    }
+                    }
+
+
+                @Override
+                public void onFailure(Call<User> call, Throwable t) {
+                    showProgress(false);
+                    Log.i("Error", " " + t.getMessage());
+                }
+            });
+
+           /*         if(response.code()== 200){
                         if(response.body().get(0).getName_user().isEmpty()){
                             //El usuario es incorrecto o no esta registrado
                             Toast.makeText(LoginActivity.this, "El usuario no esta registrado", Toast.LENGTH_SHORT).show();
@@ -212,27 +238,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             if (response.body().get(0).getUrl_endpoints().isEmpty()|| response.body().get(0).getAwtenantcode_endpoints().isEmpty()
                                     ||response.body().get(0).getServerpassword_endpoints().isEmpty()|| response.body().get(0).getServeruser_endpoints().isEmpty()){
                                 //Si no los tiene, Ir a pantalla para llenar los campos
-                               /* Bundle bundle = new Bundle();
+                               *//* Bundle bundle = new Bundle();
                                 bundle.putString(response.body().get(0).getUrl_endpoints(), URL_ENDPOINTS);
                                 bundle.putString(response.body().get(0).getAwtenantcode_endpoints(), AWTENANTCODE_ENDPOINTS);
                                 bundle.putString(response.body().get(0).getServerpassword_endpoints(), SERVER_PASSWORD_ENDPOINTS);
-                                bundle.putString(response.body().get(0).getServeruser_endpoints(), SERVER_USER_ENDPOINTS);*/
-
+                                bundle.putString(response.body().get(0).getServeruser_endpoints(), SERVER_USER_ENDPOINTS);*//*
+                                Intent intent = new Intent(LoginActivity.this, UserEndpointsActivity.class);
+                                intent.putExtra(response.body().get(0).getUrl_endpoints(), URL_ENDPOINTS);
+                                intent.putExtra(response.body().get(0).getAwtenantcode_endpoints(), AWTENANTCODE_ENDPOINTS);
+                                intent.putExtra(response.body().get(0).getServerpassword_endpoints(), SERVER_PASSWORD_ENDPOINTS);
+                                intent.putExtra(response.body().get(0).getServeruser_endpoints(), SERVER_USER_ENDPOINTS);
                             }
                             else {
                                 //Si los tiene Ir a menu
                                 startAvtivictyOnSuccesLogin();
                             }
                         }
-                    }
-                }
+                    }*/
 
-                @Override
-                public void onFailure(Call<List<User>> call, Throwable t) {
-                    showProgress(false);
-                    Log.d("Error :", "" + t.getMessage());
-                }
-            });
         }
     }
 
