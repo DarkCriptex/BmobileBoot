@@ -96,7 +96,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         loginInterface = restAdapter.create(LoginInterface.class);
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.url_endpoints);
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         //populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.serverpassword_endpoints);
