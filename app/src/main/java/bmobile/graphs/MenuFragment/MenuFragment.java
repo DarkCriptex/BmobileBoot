@@ -25,7 +25,6 @@ import bmobile.graphs.MainActivityBoot;
 import bmobile.graphs.MenuActivity;
 import bmobile.graphs.MenuAdapter.MenuAdapter;
 import bmobile.graphs.R;
-import bmobile.graphs.SimpleDividerItemDecoration;
 
 
 public class MenuFragment extends Fragment {

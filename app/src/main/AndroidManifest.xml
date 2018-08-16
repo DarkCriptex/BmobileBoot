@@ -29,7 +29,9 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".MenuActivity" />
         <activity android:name=".MainActivityBoot" />
-        <activity android:name=".UserEndpointsActivity"></activity>
+        <activity
+            android:name=".UserEndpointsActivity"
+            android:label="@string/title_activity_user_endpoints"/>
     </application>
 
 </manifest>

@@ -32,10 +32,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
+import bmobile.graphs.LoginInterface.Error;
 import bmobile.graphs.LoginInterface.LoginBody;
 import bmobile.graphs.LoginInterface.LoginInterface;
 import bmobile.graphs.LoginInterface.User;
@@ -74,7 +74,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
+    //private UserLoginTask mAuthTask = null;
 
 
     // UI references.
@@ -96,10 +96,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         loginInterface = restAdapter.create(LoginInterface.class);
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.url_endpoints);
         //populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
+        mPasswordView = (EditText) findViewById(R.id.serverpassword_endpoints);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -115,7 +115,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = (Button) findViewById(R.id.send_endpoints_parameters);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -142,9 +142,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
+       /* if (mAuthTask != null) {
             return;
-        }
+        }*/
 
         // Reset errors.
         mEmailView.setError(null);
@@ -183,85 +183,76 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-           // mAuthTask = new UserLoginTask(email, password);
+            //mAuthTask = new UserLoginTask(email, password);
            // mAuthTask.execute((Void) null);
 
-            Call<User> loginCall = loginInterface.login(new LoginBody(email, password));
-            loginCall.enqueue(new Callback<User>() {
+            Call<User<Error>> loginCall = loginInterface.login(new LoginBody(email, password));
+            loginCall.enqueue(new Callback<User<Error>>() {
                 @Override
-                public void onResponse(Call<User> call, Response<User> response) {
-                    Log.d("Respuesta :",""+ response.body() + " Respuesta " +  response.body().toString());
+                public void onResponse(Call<User<Error>> call, Response<User<Error>> response) {
+                    Log.d("Respuesta :", "" + response.body() + " Respuesta " + response.code() + response.isSuccessful());
 
                     showProgress(false);
-                    if(response.code()== SUCCESFUL_RESPONSE_CODE && response.isSuccessful()){
-                        User user;
-                        user = response.body();
-                            //El usuario esta registrado
-                            //Comprobar si cuenta con todos los datos
-                            if (user.getUrlEndpoints().isEmpty()|| user.getAwtenantcodeEndpoints().isEmpty()
-                                    ||user.getServerpasswordEndpoints().isEmpty()|| user.getServeruserEndpoints().isEmpty()){
-                                //Si no los tiene, Ir a pantalla para llenar los campos
-                                Intent intent = new Intent(LoginActivity.this, UserEndpointsActivity.class);
-                                intent.putExtra(user.getUrlEndpoints(), URL_ENDPOINTS);
-                                intent.putExtra(user.getAwtenantcodeEndpoints(), AWTENANTCODE_ENDPOINTS);
-                                intent.putExtra(user.getServerpasswordEndpoints(), SERVER_PASSWORD_ENDPOINTS);
-                                intent.putExtra(user.getServeruserEndpoints(), SERVER_USER_ENDPOINTS);
-                                startActivity(intent);
-                            }
-                            else {
-                                //Si los tiene Ir a menu
-                                startAvtivictyOnSuccesLogin();
-                            }
+                    if (response.code() == SUCCESFUL_RESPONSE_CODE && response.isSuccessful()) {
+                            User user;
+                            user = response.body();
+                      try {
+
+                        if(response.body().getError().getText() != null){
+                            Toast.makeText(LoginActivity.this, "" + response.body().getError().getText(), Toast.LENGTH_SHORT).show();
                         }
+
                         else {
-                            Log.i("Respuesta vacia", " " + response.body());
+                                //El usuario esta registrado
+                                //Comprobar si cuenta con todos los datos
+                                try {
+                                    if (user.getUrlEndpoints() != null && user.getAwtenantcodeEndpoints() != null
+                                            && user.getServeruserEndpoints() != null && user.getServerpasswordEndpoints() != null) {
+                                        startAvtivictyOnSuccesLogin();
+                                    } else {
+                                        Log.d("Vacio", "");
+                                        Intent intent = new Intent(LoginActivity.this, UserEndpointsActivity.class);
+                                        intent.putExtra(user.getUrlEndpoints(), URL_ENDPOINTS);
+                                        intent.putExtra(user.getAwtenantcodeEndpoints(), AWTENANTCODE_ENDPOINTS);
+                                        intent.putExtra(user.getServerpasswordEndpoints(), SERVER_PASSWORD_ENDPOINTS);
+                                        intent.putExtra(user.getServeruserEndpoints(), SERVER_USER_ENDPOINTS);
+                                        startActivity(intent);
+
+                                    }
+                                } catch (NullPointerException e) {
+                                    e.printStackTrace();
+                                }
+
+
+                        }
+                    }
+                    catch (NullPointerException e) {
+                            e.printStackTrace();
+                    }
+                    }
+                        else{
+                            Log.i("Respuesta vacia", " " + response.errorBody());
+                            Toast.makeText(LoginActivity.this, "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
                             showProgress(false);
+                        }
+
                     }
-                    }
+
 
 
                 @Override
-                public void onFailure(Call<User> call, Throwable t) {
+                public void onFailure(Call<User<Error>> call, Throwable t) {
                     showProgress(false);
                     Log.i("Error", " " + t.getMessage());
                 }
             });
-
-           /*         if(response.code()== 200){
-                        if(response.body().get(0).getName_user().isEmpty()){
-                            //El usuario es incorrecto o no esta registrado
-                            Toast.makeText(LoginActivity.this, "El usuario no esta registrado", Toast.LENGTH_SHORT).show();
-                        }
-                        else {
-                            //El usuario esta registrado
-                            //Comprobar si cuenta con todos los datos
-                            if (response.body().get(0).getUrl_endpoints().isEmpty()|| response.body().get(0).getAwtenantcode_endpoints().isEmpty()
-                                    ||response.body().get(0).getServerpassword_endpoints().isEmpty()|| response.body().get(0).getServeruser_endpoints().isEmpty()){
-                                //Si no los tiene, Ir a pantalla para llenar los campos
-                               *//* Bundle bundle = new Bundle();
-                                bundle.putString(response.body().get(0).getUrl_endpoints(), URL_ENDPOINTS);
-                                bundle.putString(response.body().get(0).getAwtenantcode_endpoints(), AWTENANTCODE_ENDPOINTS);
-                                bundle.putString(response.body().get(0).getServerpassword_endpoints(), SERVER_PASSWORD_ENDPOINTS);
-                                bundle.putString(response.body().get(0).getServeruser_endpoints(), SERVER_USER_ENDPOINTS);*//*
-                                Intent intent = new Intent(LoginActivity.this, UserEndpointsActivity.class);
-                                intent.putExtra(response.body().get(0).getUrl_endpoints(), URL_ENDPOINTS);
-                                intent.putExtra(response.body().get(0).getAwtenantcode_endpoints(), AWTENANTCODE_ENDPOINTS);
-                                intent.putExtra(response.body().get(0).getServerpassword_endpoints(), SERVER_PASSWORD_ENDPOINTS);
-                                intent.putExtra(response.body().get(0).getServeruser_endpoints(), SERVER_USER_ENDPOINTS);
-                            }
-                            else {
-                                //Si los tiene Ir a menu
-                                startAvtivictyOnSuccesLogin();
-                            }
-                        }
-                    }*/
 
         }
     }
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains(".");
+        return email.contains(".") && email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
@@ -399,7 +390,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
+            //mAuthTask = null;
             showProgress(false);
 
             if (success) {
@@ -413,7 +404,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected void onCancelled() {
-            mAuthTask = null;
+            //mAuthTask = null;
             showProgress(false);
         }
     }

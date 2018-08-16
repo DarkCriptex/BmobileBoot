@@ -17,5 +17,6 @@ public interface LoginInterface {
     public static final String BASE_URL ="http://172.16.17.250/slimws/src/public/api/";
     @Headers( "Content-Type: application/json")
     @POST("utils/obtenerDatosLogin")
-    Call<User>login(@Body LoginBody loginBody);
+    Call<User<Error>>login(@Body LoginBody loginBody);
+    Call<Error>error(@Body LoginBody loginBody);
 }
