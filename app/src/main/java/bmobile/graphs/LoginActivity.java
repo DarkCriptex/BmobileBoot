@@ -99,7 +99,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView = findViewById(R.id.email);
         //populateAutoComplete();
 
-        mPasswordView = findViewById(R.id.serverpassword_endpoints);
+        mPasswordView = findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -115,7 +115,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.send_endpoints_parameters);
+        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -194,11 +194,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                     showProgress(false);
                     if (response.code() == SUCCESFUL_RESPONSE_CODE && response.isSuccessful()) {
-                            User user;
-                            user = response.body();
+                            User user = new User(response.body());
+                            Log.e("User : ", " " + user.toString());
                       try {
 
-                        if(response.body().getError().getText() != null){
+                        if( user.getError()!= null){
                             Toast.makeText(LoginActivity.this, "" + response.body().getError().getText(), Toast.LENGTH_SHORT).show();
                         }
 
