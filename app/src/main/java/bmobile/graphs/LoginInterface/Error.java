@@ -10,6 +10,7 @@ public class Error {
     @Expose
     @Nullable
     private String  text;
+
     @Nullable
     public String getText() {
         return text;
@@ -22,7 +23,7 @@ public class Error {
     public Error(String text) {
         this.text = text;
     }
-    @Nullable
+
     @Override
     public String toString() {
         return "Error{" +

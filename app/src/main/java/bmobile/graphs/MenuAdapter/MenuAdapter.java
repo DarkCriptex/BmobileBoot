@@ -8,15 +8,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import java.util.ArrayList;
+
+import bmobile.graphs.LoginInterface.Proveedores;
 import bmobile.graphs.MenuFragment.MenuFragment;
 import bmobile.graphs.R;
 
 public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuHolder>{
 
-    ArrayList<String> MenuArrayList;
+    ArrayList<Proveedores> MenuArrayList;
     Context context;
     MenuFragment.MenuOnClickItem menuOnClickItem;
-    public  MenuAdapter(ArrayList<String> MenuArrayList, Context context, MenuFragment.MenuOnClickItem menuOnClickItem){
+    public  MenuAdapter(ArrayList<Proveedores> MenuArrayList, Context context, MenuFragment.MenuOnClickItem menuOnClickItem){
         this.MenuArrayList = MenuArrayList;
         this.context = context;
         this.menuOnClickItem = menuOnClickItem;
@@ -32,7 +34,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuHolder>{
 
         }
 
-        public void bind (Context context, final ArrayList<String> MenuArrayList, final MenuFragment.MenuOnClickItem menuOnClickItem, final int position){
+        public void bind (Context context, final ArrayList<Proveedores> MenuArrayList, final MenuFragment.MenuOnClickItem menuOnClickItem, final int position){
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -52,7 +54,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull MenuHolder holder, int position) {
-            holder.MenuTextView.setText(MenuArrayList.get(position));
+            holder.MenuTextView.setText(MenuArrayList.get(position).getNameProvider());
             holder.bind(context, MenuArrayList, menuOnClickItem, position);
     }
 

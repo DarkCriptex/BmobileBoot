@@ -18,5 +18,5 @@ public interface LoginInterface {
     @Headers( "Content-Type: application/json")
     @POST("utils/obtenerDatosLogin")
     Call<User<Error>>login(@Body LoginBody loginBody);
-    Call<Error>error(@Body LoginBody loginBody);
+
 }

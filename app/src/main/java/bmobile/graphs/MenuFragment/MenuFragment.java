@@ -4,6 +4,7 @@ package bmobile.graphs.MenuFragment;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -20,18 +21,28 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import bmobile.graphs.LoginActivity;
+import bmobile.graphs.LoginInterface.Error;
+import bmobile.graphs.LoginInterface.LoginBody;
+import bmobile.graphs.LoginInterface.Proveedores;
+import bmobile.graphs.LoginInterface.User;
+import bmobile.graphs.LoginInterface.UserService;
 import bmobile.graphs.MainActivity;
 import bmobile.graphs.MainActivityBoot;
 import bmobile.graphs.MenuActivity;
 import bmobile.graphs.MenuAdapter.MenuAdapter;
 import bmobile.graphs.R;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.http.Body;
 
 
 public class MenuFragment extends Fragment {
 
     private static final String TAG = MenuFragment.class.getSimpleName();
     private static final int MY_PERMISSIONS_READ_PHONE_STATE = 1;
-    public ArrayList<String>menuList;
+    public ArrayList<Proveedores>menuList;
     RecyclerView recyclerView;
     public MenuFragment() {
         // Required empty public constructor
@@ -42,7 +53,7 @@ public class MenuFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         Bundle bundle = getArguments();
-        menuList = bundle.getStringArrayList(MenuActivity.OPTIONS_MENU);
+        menuList = bundle.getParcelableArrayList(MenuActivity.OPTIONS_MENU);
         if (menuList ==null){
             Log.d(TAG,"El array esta vacio");
         }
@@ -62,7 +73,7 @@ public class MenuFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         MenuAdapter menuAdapter = new MenuAdapter(menuList, getContext(), new MenuOnClickItem() {
             @Override
-            public void onMenuItemClick(ArrayList<String> MenuList, int position ) {
+            public void onMenuItemClick(ArrayList<Proveedores> MenuList, int position ) {
                 goToOptionMenuSelected(MenuList, position);
 
             }
@@ -73,19 +84,25 @@ public class MenuFragment extends Fragment {
         return view;
     }
 
-    private void goToOptionMenuSelected(ArrayList<String>MenuList, int position) {
-        String name = MenuList.get(position).toString();
+    private void goToOptionMenuSelected(ArrayList<Proveedores>MenuList, final int position) {
+        String name = MenuList.get(position).getNameProvider();
         Toast.makeText(getContext(), ""+name, Toast.LENGTH_SHORT).show();
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences(LoginActivity.LOGIN_DATA, Context.MODE_PRIVATE);
+        String userEmail = sharedPreferences.getString(LoginActivity.USER_MAIL,null);
+        String userPass  = sharedPreferences.getString(LoginActivity.USER_PASSWORD, null);
+        Log.e("User " + userEmail, " Pass " + userPass);
+       // MenuActivity menuActivity = new MenuActivity();
 
-        MenuActivity menuActivity = new MenuActivity();
-        if (MenuList.get(position).equals("Graficas")){
+        if (MenuList.get(position).getNameProvider().equals("MobileIron")){
+            getUserEndpoints(position, userEmail, userPass);
             Intent intent = new Intent(getContext(), MainActivity.class);
             startActivity(intent);
         }
-        else if (MenuList.get(position).equals("Chat")){
+        else if (MenuList.get(position).getNameProvider().equals("AirWatch")){
+
             permissionsReadPhoneState();
         }
-        else if(MenuList.get(position).equals("Aruba")){
+        else if(MenuList.get(position).getNameProvider().equals("Aruba")){
             Toast.makeText(getContext(), "Lo sentimos esta función aún no esta disponible", Toast.LENGTH_SHORT).show();
         }
         else {
@@ -95,7 +112,7 @@ public class MenuFragment extends Fragment {
 
 
     public interface MenuOnClickItem{
-        void onMenuItemClick(ArrayList<String>menuList, int position);
+        void onMenuItemClick(ArrayList<Proveedores> menuList, int position);
     }
 
     public void permissionsReadPhoneState() {
@@ -158,5 +175,20 @@ public class MenuFragment extends Fragment {
                 return;
             }
         }
+    }
+
+    private void getUserEndpoints(int position, String mail, String pass){
+        Call<User<Error>> getUserEndpoints = UserService.getUserEndpoints().login(new LoginBody( mail, pass));
+        getUserEndpoints.enqueue(new Callback<User<Error>>() {
+            @Override
+            public void onResponse(Call<User<Error>> call, Response<User<Error>> response) {
+                Log.e("Response", " " + response.body());
+            }
+
+            @Override
+            public void onFailure(Call<User<Error>> call, Throwable t) {
+                t.getMessage();
+            }
+        });
     }
 }

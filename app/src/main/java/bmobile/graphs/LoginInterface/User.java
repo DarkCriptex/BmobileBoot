@@ -5,6 +5,9 @@ import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class User <T>{
     @SerializedName("id_user")
     @Expose
@@ -34,31 +37,24 @@ public class User <T>{
     @Expose
     @Nullable
     private String nameClient;
-    @SerializedName("name_provider")
-    @Expose
-    @Nullable
-    private String nameProvider;
-    @SerializedName("url_endpoints")
-    @Expose
-    @Nullable
-    private String urlEndpoints;
-    @SerializedName("awtenantcode_endpoints")
-    @Expose
-    @Nullable
-    private String awtenantcodeEndpoints;
-    @SerializedName("serverpassword_endpoints")
-    @Expose
-    @Nullable
-    private String serverpasswordEndpoints;
-    @SerializedName("serveruser_endpoints")
-    @Expose
-    @Nullable
-    private String serveruserEndpoints;
+
     @SerializedName("Error")
     @Expose
     @Nullable
-
     private T error;
+    @Nullable
+    @Expose
+    @SerializedName("proveedores")
+    private ArrayList<Proveedores> proveedores;
+    @Nullable
+    public ArrayList<Proveedores> proveedores() {
+        return proveedores;
+    }
+
+    public void setName_provider(@Nullable ArrayList<Proveedores> proveedores) {
+        this.proveedores = proveedores;
+    }
+
     @Nullable
     public T getError() {
         return error;
@@ -125,45 +121,7 @@ public class User <T>{
         this.nameClient = nameClient;
     }
     @Nullable
-    public String getNameProvider() {
-        return nameProvider;
-    }
-    @Nullable
-    public void setNameProvider(String nameProvider) {
-        this.nameProvider = nameProvider;
-    }
-    @Nullable
-    public String getUrlEndpoints() {
-        return urlEndpoints;
-    }
-    @Nullable
-    public void setUrlEndpoints(String urlEndpoints) {
-        this.urlEndpoints = urlEndpoints;
-    }
-    @Nullable
-    public String getAwtenantcodeEndpoints() {
-        return awtenantcodeEndpoints;
-    }
-    @Nullable
-    public void setAwtenantcodeEndpoints(String awtenantcodeEndpoints) {
-        this.awtenantcodeEndpoints = awtenantcodeEndpoints;
-    }
-    @Nullable
-    public String getServerpasswordEndpoints() {
-        return serverpasswordEndpoints;
-    }
-    @Nullable
-    public void setServerpasswordEndpoints(String serverpasswordEndpoints) {
-        this.serverpasswordEndpoints = serverpasswordEndpoints;
-    }
-    @Nullable
-    public String getServeruserEndpoints() {
-        return serveruserEndpoints;
-    }
-    @Nullable
-    public void setServeruserEndpoints(String serveruserEndpoints) {
-        this.serveruserEndpoints = serveruserEndpoints;
-    }
+
 
     @Override
     public String toString() {
@@ -175,12 +133,8 @@ public class User <T>{
                 ", emailUser='" + emailUser + '\'' +
                 ", nameLeveluser='" + nameLeveluser + '\'' +
                 ", nameClient='" + nameClient + '\'' +
-                ", nameProvider='" + nameProvider + '\'' +
-                ", urlEndpoints='" + urlEndpoints + '\'' +
-                ", awtenantcodeEndpoints='" + awtenantcodeEndpoints + '\'' +
-                ", serverpasswordEndpoints='" + serverpasswordEndpoints + '\'' +
-                ", serveruserEndpoints='" + serveruserEndpoints + '\'' +
                 ", error=" + error +
+                ", proveedores='"  + '\'' + proveedores +
                 '}';
     }
 
@@ -192,11 +146,6 @@ public class User <T>{
         this.emailUser = user.emailUser;
         this.nameLeveluser = user.nameLeveluser;
         this.nameClient = user.nameClient;
-        this.nameProvider = user.nameProvider;
-        this.urlEndpoints = user.urlEndpoints;
-        this.awtenantcodeEndpoints = user.awtenantcodeEndpoints;
-        this.serverpasswordEndpoints = user.serverpasswordEndpoints;
-        this.serveruserEndpoints = user.serveruserEndpoints;
 
     }
 }

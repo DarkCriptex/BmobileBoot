@@ -5,8 +5,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -38,6 +40,7 @@ import java.util.List;
 import bmobile.graphs.LoginInterface.Error;
 import bmobile.graphs.LoginInterface.LoginBody;
 import bmobile.graphs.LoginInterface.LoginInterface;
+import bmobile.graphs.LoginInterface.Proveedores;
 import bmobile.graphs.LoginInterface.User;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -53,11 +56,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public static final int SUCCESFUL_RESPONSE_CODE = 200;
     private Retrofit restAdapter;
     private LoginInterface loginInterface;
-
+    String email;
+    String password;
     public static String URL_ENDPOINTS = "url_endpoints";
     public static String  AWTENANTCODE_ENDPOINTS = "awtenantcode_endpoints";
     public static String SERVER_PASSWORD_ENDPOINTS = "serverpassword_endpoints";
     public static String SERVER_USER_ENDPOINTS = "serveruser_endpoints";
+    public static String LOGIN_DATA = "Login";
+    public static String USER_MAIL = "user_mail";
+    public static String USER_PASSWORD = "user_pass";
+    public static String STRING_ARRAYLIS_KEY = "List";
     /**
      * Id to identity READ_CONTACTS permission request.
      */
@@ -82,6 +90,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    public ArrayList <Proveedores> proveedores;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,9 +161,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
-
+         email = mEmailView.getText().toString();
+         password = mPasswordView.getText().toString();
+        SharedPreferences sharedPreferences = getSharedPreferences(LOGIN_DATA, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(USER_MAIL, email );
+        editor.putString(USER_PASSWORD, password);
+        editor.apply();
         boolean cancel = false;
         View focusView = null;
 
@@ -195,7 +209,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     showProgress(false);
                     if (response.code() == SUCCESFUL_RESPONSE_CODE && response.isSuccessful()) {
                             User user = new User(response.body());
-                            Log.e("User : ", " " + user.toString());
+
+                             proveedores = response.body().proveedores();
+
                       try {
 
                         if( user.getError()!= null){
@@ -203,26 +219,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         }
 
                         else {
-                                //El usuario esta registrado
-                                //Comprobar si cuenta con todos los datos
-                                try {
-                                    if (user.getUrlEndpoints() != null && user.getAwtenantcodeEndpoints() != null
-                                            && user.getServeruserEndpoints() != null && user.getServerpasswordEndpoints() != null) {
-                                        startAvtivictyOnSuccesLogin();
-                                    } else {
-                                        Log.d("Vacio", "");
-                                        Intent intent = new Intent(LoginActivity.this, UserEndpointsActivity.class);
-                                        intent.putExtra(user.getUrlEndpoints(), URL_ENDPOINTS);
-                                        intent.putExtra(user.getAwtenantcodeEndpoints(), AWTENANTCODE_ENDPOINTS);
-                                        intent.putExtra(user.getServerpasswordEndpoints(), SERVER_PASSWORD_ENDPOINTS);
-                                        intent.putExtra(user.getServeruserEndpoints(), SERVER_USER_ENDPOINTS);
-                                        startActivity(intent);
-
-                                    }
-                                } catch (NullPointerException e) {
-                                    e.printStackTrace();
-                                }
-
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelableArrayList(STRING_ARRAYLIS_KEY, proveedores);
+                            startAvtivictyOnSuccesLogin(bundle);
 
                         }
                     }
@@ -351,6 +350,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -395,7 +395,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                startAvtivictyOnSuccesLogin();
+                //startAvtivictyOnSuccesLogin();
                 //finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
@@ -417,12 +417,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     }
 
-    private void startAvtivictyOnSuccesLogin() {
-        startActivity(new Intent(this, MenuActivity.class));
+    private void startAvtivictyOnSuccesLogin(Bundle bundle) {
+        Intent intent = new Intent(this, MenuActivity.class);
+        intent.putExtras(bundle);
+        startActivity(intent);
+        //startActivity(new Intent(this, MenuActivity.class));
         finish();
     }
 
     private void showLoginError(String error) {
         Toast.makeText(this, error, Toast.LENGTH_LONG).show();
     }
+
 }
