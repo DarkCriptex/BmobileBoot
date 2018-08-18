@@ -9,6 +9,15 @@ public class UserConfigBody {
    private int endpoints_user_iotdevice;
    private int endpoints_provider_iotdevice;
 
+    public UserConfigBody(String url_endpoints, String awtenantcode_endpoints, String serveruser_endpoints, String serverpassword_endpoints, int endpoints_user_iotdevice, int endpoints_provider_iotdevice) {
+        this.url_endpoints = url_endpoints;
+        this.awtenantcode_endpoints = awtenantcode_endpoints;
+        this.serveruser_endpoints = serveruser_endpoints;
+        this.serverpassword_endpoints = serverpassword_endpoints;
+        this.endpoints_user_iotdevice = endpoints_user_iotdevice;
+        this.endpoints_provider_iotdevice = endpoints_provider_iotdevice;
+    }
+
 
     public String getUrl_endpoints() {
         return url_endpoints;
@@ -58,14 +67,7 @@ public class UserConfigBody {
         this.endpoints_provider_iotdevice = endpoints_provider_iotdevice;
     }
 
-    public UserConfigBody(UserConfigBody userConfigBody) {
-        this.url_endpoints = userConfigBody.url_endpoints;
-        this.awtenantcode_endpoints = userConfigBody.awtenantcode_endpoints;
-        this.serveruser_endpoints = userConfigBody.serveruser_endpoints;
-        this.serverpassword_endpoints = userConfigBody.serverpassword_endpoints;
-        this.endpoints_user_iotdevice = userConfigBody.endpoints_user_iotdevice;
-        this.endpoints_provider_iotdevice = userConfigBody.endpoints_provider_iotdevice;
-    }
+
 
     @Override
     public String toString() {

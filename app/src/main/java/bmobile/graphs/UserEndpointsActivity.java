@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,7 +33,14 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import bmobile.graphs.LoginInterface.Error;
 import bmobile.graphs.MenuFragment.MenuFragment;
+import bmobile.graphs.UserConfigInterface.ResponseUserConfig;
+import bmobile.graphs.UserConfigInterface.UserConfigBody;
+import bmobile.graphs.UserConfigInterface.UserConfigService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A login screen that offers login via email/password.
@@ -49,8 +57,8 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
-    private Integer endpoints_provider_iotdevice;
-    private Integer endpoints_user_iotdevice;
+    private int endpoints_provider_iotdevice;
+    private int endpoints_user_iotdevice;
     // UI references.
     private EditText urlEndPointEditText;
     private EditText serverPasswordEditText;
@@ -103,12 +111,17 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
 
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
+                Intent intent = getIntent();
                 urlEndPointEditText.setText(bundle.getString(MenuFragment.URL_ENDPOINTS_KEY));
                 awtenatCodeEditText.setText(bundle.getString(MenuFragment.AWTENANTCODE_ENDPOINTS_KEY));
                 serverUserEditText.setText(bundle.getString(MenuFragment.SERVER_USER_ENDPOINTS_KEY));
                 serverPasswordEditText.setText(bundle.getString(MenuFragment.SERVER_PASSWORD_ENDPOINTS_KEY));
                 endpoints_user_iotdevice = bundle.getInt(MenuFragment.ENDPOITS_USER_IOTDEVICE_KEY);
-                endpoints_provider_iotdevice = bundle.getInt(MenuFragment.ENDPOITS_PROVIDER_IOTDEVICE_KEY);
+                //endpoints_provider_iotdevice = bundle.getInt(MenuFragment.ENDPOITS_PROVIDER_IOTDEVICE_KEY);
+                endpoints_provider_iotdevice =0;
+                //endpoints_user_iotdevice = intent.getIntExtra(MenuFragment.ENDPOITS_USER_IOTDEVICE_KEY, -1);
+                //endpoints_provider_iotdevice = intent.getIntExtra(MenuFragment.ENDPOITS_PROVIDER_IOTDEVICE_KEY, -1);
+                Log.e("Bundle" , " " + endpoints_provider_iotdevice + endpoints_user_iotdevice);
         }
     }
 
@@ -171,7 +184,33 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            startAvtivictyOnSuccesLogin();
+            Call<ResponseUserConfig<Error>> saveUserConfig = UserConfigService.saveUserConfig().userConfig(new UserConfigBody(urlEndpoits, awtenantCode, serverUser, serverPassword, endpoints_user_iotdevice, endpoints_provider_iotdevice));
+            saveUserConfig.enqueue(new Callback<ResponseUserConfig<Error>>() {
+                @Override
+                public void onResponse(Call<ResponseUserConfig<Error>> call, Response<ResponseUserConfig<Error>> response) {
+                    showProgress(false);
+                    Log.e("ResposUserConfig", " " + response.body().getIdEndpoints());
+                    if (response.isSuccessful() && response.code() == LoginActivity.SUCCESFUL_RESPONSE_CODE){
+                        if(response.body().getError()!= null){
+                            Toast.makeText(UserEndpointsActivity.this, "" + response.body().getError().getText(), Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            startAvtivictyOnSuccesLogin();
+                        }
+
+                    }
+                    else {
+                        Toast.makeText(UserEndpointsActivity.this, "Ha ocurrido un error, inténtelo más tarde", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseUserConfig<Error>> call, Throwable t) {
+                    showProgress(false);
+                    t.getMessage();
+                }
+            });
+
         }
     }
 
@@ -328,6 +367,12 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
 
     private void showLoginError(String error) {
         Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+    }
+    @Override
+    public void onBackPressed(){
+        Intent intent = new Intent(this, MenuActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
 

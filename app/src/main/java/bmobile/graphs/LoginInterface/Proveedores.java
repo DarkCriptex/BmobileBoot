@@ -34,10 +34,31 @@ public class Proveedores implements Parcelable{
     private String serveruserEndpoints;
     @SerializedName("endpoints_provider_iotdevice")
     @Expose
-    private Integer endpoints_provider_iotdevice;
+    private int endpoints_provider_iotdevice;
 
 
-    public Integer getEndpoints_provider_iotdevice() {
+    protected Proveedores(Parcel in) {
+        name_provider = in.readString();
+        urlEndpoints = in.readString();
+        awtenantcodeEndpoints = in.readString();
+        serverpasswordEndpoints = in.readString();
+        serveruserEndpoints = in.readString();
+
+    }
+
+    public static final Creator<Proveedores> CREATOR = new Creator<Proveedores>() {
+        @Override
+        public Proveedores createFromParcel(Parcel in) {
+            return new Proveedores(in);
+        }
+
+        @Override
+        public Proveedores[] newArray(int size) {
+            return new Proveedores[size];
+        }
+    };
+
+    public int getEndpoints_provider_iotdevice() {
         return endpoints_provider_iotdevice;
     }
 
@@ -99,31 +120,7 @@ public class Proveedores implements Parcelable{
         this.name_provider = name_provider;
     }
 
-    protected Proveedores(Parcel in) {
 
-        name_provider = in.readString();
-        urlEndpoints = in.readString();
-        awtenantcodeEndpoints = in.readString();
-        serverpasswordEndpoints = in.readString();
-        serveruserEndpoints = in.readString();
-        if (in.readByte() == 0) {
-            endpoints_provider_iotdevice = null;
-        } else {
-            endpoints_provider_iotdevice = in.readInt();
-        }
-    }
-
-    public static final Creator<Proveedores> CREATOR = new Creator<Proveedores>() {
-        @Override
-        public Proveedores createFromParcel(Parcel in) {
-            return new Proveedores(in);
-        }
-
-        @Override
-        public Proveedores[] newArray(int size) {
-            return new Proveedores[size];
-        }
-    };
 
 
 
@@ -151,6 +148,6 @@ public class Proveedores implements Parcelable{
         dest.writeString(awtenantcodeEndpoints);
         dest.writeString(serverpasswordEndpoints);
         dest.writeString(serveruserEndpoints);
-        dest.writeInt(endpoints_provider_iotdevice);
+
     }
 }

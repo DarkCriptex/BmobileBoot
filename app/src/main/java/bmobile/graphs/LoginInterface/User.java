@@ -8,15 +8,13 @@ import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
-public class User <T> implements Parcelable{
+public class User <T>{
     @SerializedName("id_user")
     @Expose
     @Nullable
-    private Integer idUser;
+    private int id_user;
     @SerializedName("user_client_iotdevice")
     @Expose
     @Nullable
@@ -45,42 +43,14 @@ public class User <T> implements Parcelable{
     @SerializedName("Error")
     @Expose
     @Nullable
-    private T error;
+    private T Error;
     @Nullable
     @Expose
     @SerializedName("proveedores")
     private ArrayList<Proveedores> proveedores;
 
-    protected User(Parcel in) {
-        if (in.readByte() == 0) {
-            idUser = null;
-        } else {
-            idUser = in.readInt();
-        }
-        if (in.readByte() == 0) {
-            userClientIotdevice = null;
-        } else {
-            userClientIotdevice = in.readInt();
-        }
-        nameUser = in.readString();
-        lastnamesUser = in.readString();
-        emailUser = in.readString();
-        nameLeveluser = in.readString();
-        nameClient = in.readString();
-        proveedores = in.createTypedArrayList(Proveedores.CREATOR);
-    }
 
-    public static final Creator<User> CREATOR = new Creator<User>() {
-        @Override
-        public User createFromParcel(Parcel in) {
-            return new User(in);
-        }
 
-        @Override
-        public User[] newArray(int size) {
-            return new User[size];
-        }
-    };
 
     @Nullable
     public ArrayList<Proveedores> proveedores() {
@@ -93,20 +63,20 @@ public class User <T> implements Parcelable{
 
     @Nullable
     public T getError() {
-        return error;
+        return Error;
     }
 
-    public void setError(@Nullable T error) {
-        this.error = error;
+    public void setError(@Nullable T Error) {
+        this.Error = Error;
     }
 
     @Nullable
-    public Integer getIdUser() {
-        return idUser;
+    public int getId_user() {
+        return id_user;
     }
 
-    public void setIdUser(@Nullable Integer idUser) {
-        this.idUser = idUser;
+    public void setId_user(@Nullable Integer id_user) {
+        this.id_user = id_user;
     }
     @Nullable
     public Integer getUserClientIotdevice() {
@@ -162,44 +132,32 @@ public class User <T> implements Parcelable{
     @Override
     public String toString() {
         return "User{" +
-                "idUser=" + idUser +
+                "id_user=" + id_user +
                 ", userClientIotdevice=" + userClientIotdevice +
                 ", nameUser='" + nameUser + '\'' +
                 ", lastnamesUser='" + lastnamesUser + '\'' +
                 ", emailUser='" + emailUser + '\'' +
                 ", nameLeveluser='" + nameLeveluser + '\'' +
                 ", nameClient='" + nameClient + '\'' +
-                ", error=" + error +
+                ", error=" + Error +
                 ", proveedores='"  + '\'' + proveedores +
                 '}';
     }
 
     public User(@Nullable User user) {
-        this.idUser = user.idUser;
+        this.id_user = user.id_user;
         this.userClientIotdevice = user.userClientIotdevice;
         this.nameUser = user.nameUser;
         this.lastnamesUser = user.lastnamesUser;
         this.emailUser = user.emailUser;
         this.nameLeveluser = user.nameLeveluser;
         this.nameClient = user.nameClient;
+        //this.Error  = (T) user.Error;
 
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(idUser);
-        dest.writeInt(userClientIotdevice);
-        dest.writeString(nameUser);
-        dest.writeString(lastnamesUser);
-        dest.writeString(emailUser);
-        dest.writeString(nameLeveluser);
-        dest.writeString(nameClient);
-    }
+
 }
 
 

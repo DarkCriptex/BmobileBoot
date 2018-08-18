@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private LoginInterface loginInterface;
     String email;
     String password;
-
+    
     public static String LOGIN_DATA = "Login";
     public static String USER_MAIL = "user_mail";
     public static String USER_PASSWORD = "user_pass";
@@ -211,7 +211,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                       try {
 
-                        if( user.getError()!= null){
+                        if( response.body().getError()!= null){
                             Toast.makeText(LoginActivity.this, "" + response.body().getError().getText(), Toast.LENGTH_SHORT).show();
                         }
 

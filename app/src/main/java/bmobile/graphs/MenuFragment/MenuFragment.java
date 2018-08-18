@@ -200,52 +200,65 @@ public class MenuFragment extends Fragment {
         getUserEndpoints.enqueue(new Callback<User<Error>>() {
             @Override
             public void onResponse(Call<User<Error>> call, Response<User<Error>> response) {
-                Log.e("Response", " " + response.body());
+                Log.e("Response", " " + response.body().getId_user());
                 if (response.code() == LoginActivity.SUCCESFUL_RESPONSE_CODE && response.isSuccessful()){
-                    try{
-                       ArrayList<Proveedores>proveedores = response.body().proveedores();
-                        User user = new User(response.body());
-                       if(proveedores.get(position).getUrlEndpoints() == null ||proveedores.get(position).getUrlEndpoints().isEmpty()||
-                          proveedores.get(position).getAwtenantcodeEndpoints() == null ||proveedores.get(position).getAwtenantcodeEndpoints().isEmpty()||
-                          proveedores.get(position).getServeruserEndpoints() == null || proveedores.get(position).getServeruserEndpoints().isEmpty()||
-                          proveedores.get(position).getServerpasswordEndpoints() == null ||proveedores.get(position).getServerpasswordEndpoints().isEmpty()){
-                           b= 1;
-                           Bundle bundle = new Bundle();
-                           bundle.putString(URL_ENDPOINTS_KEY, proveedores.get(position).getUrlEndpoints());
-                           bundle.putString(AWTENANTCODE_ENDPOINTS_KEY, proveedores.get(position).getAwtenantcodeEndpoints());
-                           bundle.putString(SERVER_USER_ENDPOINTS_KEY, proveedores.get(position).getServeruserEndpoints());
-                           bundle.putString(SERVER_PASSWORD_ENDPOINTS_KEY, proveedores.get(position).getServerpasswordEndpoints());
-                           bundle.putInt(ENDPOITS_PROVIDER_IOTDEVICE_KEY, proveedores.get(position).getEndpoints_provider_iotdevice());
-                           bundle.putInt(ENDPOITS_USER_IOTDEVICE_KEY, user.getIdUser());
-                           bundle.putString(PROVEEDOR_NAME, name);
-                           Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
-                           intent.putExtras(bundle);
-                           startActivity(intent);
-                       }
-                       else {
-                           /*Bundle bundle = new Bundle();
-                           bundle.putString(URL_ENDPOINTS_KEY, proveedores.get(position).getUrlEndpoints());
-                           bundle.putString(AWTENANTCODE_ENDPOINTS_KEY, proveedores.get(position).getAwtenantcodeEndpoints());
-                           bundle.putString(SERVER_USER_ENDPOINTS_KEY, proveedores.get(position).getServeruserEndpoints());
-                           bundle.putString(SERVER_PASSWORD_ENDPOINTS_KEY, proveedores.get(position).getServerpasswordEndpoints());
-                           bundle.putString(PROVEEDOR_NAME, name);
-                           Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
-                           intent.putExtras(bundle);
-                           startActivity(intent);*/
-
-                           b = 0;
-                       }
-
+                    if(response.body().getError()!= null){
+                        Toast.makeText(getContext(), "" + response.body().getError().getText(), Toast.LENGTH_SHORT).show();
+                        b=2;
                     }
-                    catch (NullPointerException n){
-                        n.printStackTrace();
-                        Toast.makeText(getContext(), "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
-                        b = 0;
+                    else {
+                        try {
+                            ArrayList<Proveedores> proveedores = response.body().proveedores();
+                            User user = new User(response.body());
+                            int one = user.getId_user();
+                            int two = proveedores.get(position).getEndpoints_provider_iotdevice();
+                            Log.e("Integers", " " + one + " " + two);
+                            if (proveedores.get(position).getUrlEndpoints() == null || proveedores.get(position).getUrlEndpoints().isEmpty() ||
+                                    proveedores.get(position).getAwtenantcodeEndpoints() == null || proveedores.get(position).getAwtenantcodeEndpoints().isEmpty() ||
+                                    proveedores.get(position).getServeruserEndpoints() == null || proveedores.get(position).getServeruserEndpoints().isEmpty() ||
+                                    proveedores.get(position).getServerpasswordEndpoints() == null || proveedores.get(position).getServerpasswordEndpoints().isEmpty()) {
+                                b = 1;
+                                Bundle bundle = new Bundle();
+                                bundle.putString(URL_ENDPOINTS_KEY, proveedores.get(position).getUrlEndpoints());
+                                bundle.putString(AWTENANTCODE_ENDPOINTS_KEY, proveedores.get(position).getAwtenantcodeEndpoints());
+                                bundle.putString(SERVER_USER_ENDPOINTS_KEY, proveedores.get(position).getServeruserEndpoints());
+                                bundle.putString(SERVER_PASSWORD_ENDPOINTS_KEY, proveedores.get(position).getServerpasswordEndpoints());
+
+                                // bundle.putInt(ENDPOITS_PROVIDER_IOTDEVICE_KEY,two);
+                                //bundle.putInt(ENDPOITS_USER_IOTDEVICE_KEY, one);
+                                //bundle.putParcelable(ENDPOITS_USER_IOTDEVICE_KEY,user.getId_user());
+                                bundle.putString(PROVEEDOR_NAME, name);
+                                Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
+                                intent.putExtra(ENDPOITS_USER_IOTDEVICE_KEY, one);
+                                intent.putExtra(ENDPOITS_PROVIDER_IOTDEVICE_KEY, two);
+                                intent.putExtras(bundle);
+                                startActivity(intent);
+                            } else {
+                                Bundle bundle = new Bundle();
+                                bundle.putString(URL_ENDPOINTS_KEY, proveedores.get(position).getUrlEndpoints());
+                                bundle.putString(AWTENANTCODE_ENDPOINTS_KEY, proveedores.get(position).getAwtenantcodeEndpoints());
+                                bundle.putString(SERVER_USER_ENDPOINTS_KEY, proveedores.get(position).getServeruserEndpoints());
+                                bundle.putString(SERVER_PASSWORD_ENDPOINTS_KEY, proveedores.get(position).getServerpasswordEndpoints());
+                                bundle.putString(PROVEEDOR_NAME, name);
+                                bundle.putInt(ENDPOITS_PROVIDER_IOTDEVICE_KEY, two);
+                                bundle.putInt(ENDPOITS_USER_IOTDEVICE_KEY, one);
+                                Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
+                                intent.putExtras(bundle);
+                                startActivity(intent);
+
+                                b = 0;
+                            }
+
+                        } catch (NullPointerException n) {
+                            n.printStackTrace();
+                            Toast.makeText(getContext(), "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
+                            b = 2;
+                        }
                     }
                 }
                 else {
                     Toast.makeText(getContext(), "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
-                    b= 0;
+                    b= 2;
                 }
             }
 
@@ -253,7 +266,7 @@ public class MenuFragment extends Fragment {
             public void onFailure(Call<User<Error>> call, Throwable t) {
                 t.getMessage();
                 Toast.makeText(getContext(), "Ha ocurrido un error intente mas tarde", Toast.LENGTH_SHORT).show();
-                b= 0;
+                b= 2;
             }
         });
         return b;
