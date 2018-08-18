@@ -1,14 +1,18 @@
 package bmobile.graphs.LoginInterface;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class User <T>{
+public class User <T> implements Parcelable{
     @SerializedName("id_user")
     @Expose
     @Nullable
@@ -46,6 +50,38 @@ public class User <T>{
     @Expose
     @SerializedName("proveedores")
     private ArrayList<Proveedores> proveedores;
+
+    protected User(Parcel in) {
+        if (in.readByte() == 0) {
+            idUser = null;
+        } else {
+            idUser = in.readInt();
+        }
+        if (in.readByte() == 0) {
+            userClientIotdevice = null;
+        } else {
+            userClientIotdevice = in.readInt();
+        }
+        nameUser = in.readString();
+        lastnamesUser = in.readString();
+        emailUser = in.readString();
+        nameLeveluser = in.readString();
+        nameClient = in.readString();
+        proveedores = in.createTypedArrayList(Proveedores.CREATOR);
+    }
+
+    public static final Creator<User> CREATOR = new Creator<User>() {
+        @Override
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
+
     @Nullable
     public ArrayList<Proveedores> proveedores() {
         return proveedores;
@@ -68,8 +104,8 @@ public class User <T>{
     public Integer getIdUser() {
         return idUser;
     }
-    @Nullable
-    public void setIdUser(Integer idUser) {
+
+    public void setIdUser(@Nullable Integer idUser) {
         this.idUser = idUser;
     }
     @Nullable
@@ -147,6 +183,22 @@ public class User <T>{
         this.nameLeveluser = user.nameLeveluser;
         this.nameClient = user.nameClient;
 
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(idUser);
+        dest.writeInt(userClientIotdevice);
+        dest.writeString(nameUser);
+        dest.writeString(lastnamesUser);
+        dest.writeString(emailUser);
+        dest.writeString(nameLeveluser);
+        dest.writeString(nameClient);
     }
 }
 

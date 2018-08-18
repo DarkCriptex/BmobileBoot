@@ -39,10 +39,6 @@ import bmobile.graphs.MenuFragment.MenuFragment;
  */
 public class UserEndpointsActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
-    private static final int REQUEST_READ_CONTACTS = 0;
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -53,7 +49,8 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
-
+    private Integer endpoints_provider_iotdevice;
+    private Integer endpoints_user_iotdevice;
     // UI references.
     private EditText urlEndPointEditText;
     private EditText serverPasswordEditText;
@@ -106,10 +103,12 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
 
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
-                urlEndPointEditText.setText(bundle.getString(MenuFragment.URL_ENDPOINTS));
-                awtenatCodeEditText.setText(bundle.getString(MenuFragment.AWTENANTCODE_ENDPOINTS));
-                serverUserEditText.setText(bundle.getString(MenuFragment.SERVER_USER_ENDPOINTS));
-                serverPasswordEditText.setText(bundle.getString(MenuFragment.SERVER_PASSWORD_ENDPOINTS));
+                urlEndPointEditText.setText(bundle.getString(MenuFragment.URL_ENDPOINTS_KEY));
+                awtenatCodeEditText.setText(bundle.getString(MenuFragment.AWTENANTCODE_ENDPOINTS_KEY));
+                serverUserEditText.setText(bundle.getString(MenuFragment.SERVER_USER_ENDPOINTS_KEY));
+                serverPasswordEditText.setText(bundle.getString(MenuFragment.SERVER_PASSWORD_ENDPOINTS_KEY));
+                endpoints_user_iotdevice = bundle.getInt(MenuFragment.ENDPOITS_USER_IOTDEVICE_KEY);
+                endpoints_provider_iotdevice = bundle.getInt(MenuFragment.ENDPOITS_PROVIDER_IOTDEVICE_KEY);
         }
     }
 

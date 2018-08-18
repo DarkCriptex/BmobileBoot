@@ -1,5 +1,6 @@
 package bmobile.graphs.LoginInterface;
 
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,8 +32,18 @@ public class Proveedores implements Parcelable{
     @Expose
     @Nullable
     private String serveruserEndpoints;
+    @SerializedName("endpoints_provider_iotdevice")
+    @Expose
+    private Integer endpoints_provider_iotdevice;
 
 
+    public Integer getEndpoints_provider_iotdevice() {
+        return endpoints_provider_iotdevice;
+    }
+
+    public void setEndpoints_provider_iotdevice(Integer endpoints_provider_iotdevice) {
+        this.endpoints_provider_iotdevice = endpoints_provider_iotdevice;
+    }
 
     @Nullable
     public String getName_provider() {
@@ -95,6 +106,11 @@ public class Proveedores implements Parcelable{
         awtenantcodeEndpoints = in.readString();
         serverpasswordEndpoints = in.readString();
         serveruserEndpoints = in.readString();
+        if (in.readByte() == 0) {
+            endpoints_provider_iotdevice = null;
+        } else {
+            endpoints_provider_iotdevice = in.readInt();
+        }
     }
 
     public static final Creator<Proveedores> CREATOR = new Creator<Proveedores>() {
@@ -119,6 +135,7 @@ public class Proveedores implements Parcelable{
                 ", awtenantcodeEndpoints='" + awtenantcodeEndpoints + '\'' +
                 ", serverpasswordEndpoints='" + serverpasswordEndpoints + '\'' +
                 ", serveruserEndpoints='" + serveruserEndpoints + '\'' +
+                ", endpoints_provider_iotdevice='" + endpoints_provider_iotdevice + '\'' +
                 '}';
     }
 
@@ -134,5 +151,6 @@ public class Proveedores implements Parcelable{
         dest.writeString(awtenantcodeEndpoints);
         dest.writeString(serverpasswordEndpoints);
         dest.writeString(serveruserEndpoints);
+        dest.writeInt(endpoints_provider_iotdevice);
     }
 }

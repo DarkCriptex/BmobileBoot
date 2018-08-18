@@ -36,17 +36,18 @@ import bmobile.graphs.UserEndpointsActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.http.Body;
 
 
 public class MenuFragment extends Fragment {
 
     private static final String TAG = MenuFragment.class.getSimpleName();
     private static final int MY_PERMISSIONS_READ_PHONE_STATE = 1;
-    public static String URL_ENDPOINTS = "url_endpoints";
-    public static String  AWTENANTCODE_ENDPOINTS = "awtenantcode_endpoints";
-    public static String SERVER_PASSWORD_ENDPOINTS = "serverpassword_endpoints";
-    public static String SERVER_USER_ENDPOINTS = "serveruser_endpoints";
+    public static String URL_ENDPOINTS_KEY = "url_endpoints";
+    public static String AWTENANTCODE_ENDPOINTS_KEY = "awtenantcode_endpoints";
+    public static String SERVER_PASSWORD_ENDPOINTS_KEY = "serverpassword_endpoints";
+    public static String SERVER_USER_ENDPOINTS_KEY = "serveruser_endpoints";
+    public static String ENDPOITS_USER_IOTDEVICE_KEY ="endpoints_user_iotdevice";
+    public static String ENDPOITS_PROVIDER_IOTDEVICE_KEY= "endpoints_provider_iotdevice";
     public static String PROVEEDOR_NAME = "name";
     public ArrayList<Proveedores>menuList;
     private int b;
@@ -203,16 +204,19 @@ public class MenuFragment extends Fragment {
                 if (response.code() == LoginActivity.SUCCESFUL_RESPONSE_CODE && response.isSuccessful()){
                     try{
                        ArrayList<Proveedores>proveedores = response.body().proveedores();
+                        User user = new User(response.body());
                        if(proveedores.get(position).getUrlEndpoints() == null ||proveedores.get(position).getUrlEndpoints().isEmpty()||
                           proveedores.get(position).getAwtenantcodeEndpoints() == null ||proveedores.get(position).getAwtenantcodeEndpoints().isEmpty()||
                           proveedores.get(position).getServeruserEndpoints() == null || proveedores.get(position).getServeruserEndpoints().isEmpty()||
                           proveedores.get(position).getServerpasswordEndpoints() == null ||proveedores.get(position).getServerpasswordEndpoints().isEmpty()){
                            b= 1;
                            Bundle bundle = new Bundle();
-                           bundle.putString(URL_ENDPOINTS, proveedores.get(position).getUrlEndpoints());
-                           bundle.putString(AWTENANTCODE_ENDPOINTS, proveedores.get(position).getAwtenantcodeEndpoints());
-                           bundle.putString(SERVER_USER_ENDPOINTS, proveedores.get(position).getServeruserEndpoints());
-                           bundle.putString(SERVER_PASSWORD_ENDPOINTS, proveedores.get(position).getServerpasswordEndpoints());
+                           bundle.putString(URL_ENDPOINTS_KEY, proveedores.get(position).getUrlEndpoints());
+                           bundle.putString(AWTENANTCODE_ENDPOINTS_KEY, proveedores.get(position).getAwtenantcodeEndpoints());
+                           bundle.putString(SERVER_USER_ENDPOINTS_KEY, proveedores.get(position).getServeruserEndpoints());
+                           bundle.putString(SERVER_PASSWORD_ENDPOINTS_KEY, proveedores.get(position).getServerpasswordEndpoints());
+                           bundle.putInt(ENDPOITS_PROVIDER_IOTDEVICE_KEY, proveedores.get(position).getEndpoints_provider_iotdevice());
+                           bundle.putInt(ENDPOITS_USER_IOTDEVICE_KEY, user.getIdUser());
                            bundle.putString(PROVEEDOR_NAME, name);
                            Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
                            intent.putExtras(bundle);
@@ -220,10 +224,10 @@ public class MenuFragment extends Fragment {
                        }
                        else {
                            /*Bundle bundle = new Bundle();
-                           bundle.putString(URL_ENDPOINTS, proveedores.get(position).getUrlEndpoints());
-                           bundle.putString(AWTENANTCODE_ENDPOINTS, proveedores.get(position).getAwtenantcodeEndpoints());
-                           bundle.putString(SERVER_USER_ENDPOINTS, proveedores.get(position).getServeruserEndpoints());
-                           bundle.putString(SERVER_PASSWORD_ENDPOINTS, proveedores.get(position).getServerpasswordEndpoints());
+                           bundle.putString(URL_ENDPOINTS_KEY, proveedores.get(position).getUrlEndpoints());
+                           bundle.putString(AWTENANTCODE_ENDPOINTS_KEY, proveedores.get(position).getAwtenantcodeEndpoints());
+                           bundle.putString(SERVER_USER_ENDPOINTS_KEY, proveedores.get(position).getServeruserEndpoints());
+                           bundle.putString(SERVER_PASSWORD_ENDPOINTS_KEY, proveedores.get(position).getServerpasswordEndpoints());
                            bundle.putString(PROVEEDOR_NAME, name);
                            Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
                            intent.putExtras(bundle);
