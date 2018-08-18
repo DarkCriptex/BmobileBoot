@@ -32,6 +32,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import bmobile.graphs.MenuFragment.MenuFragment;
+
 /**
  * A login screen that offers login via email/password.
  */
@@ -64,6 +66,8 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_endpoints);
+
+
         // Set up the login form.
         urlEndPointEditText = findViewById(R.id.url_endpoints);
 
@@ -99,6 +103,14 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
         awtenatCodeEditText = findViewById(R.id.awtenantcode_endpoints);
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        Bundle bundle = getIntent().getExtras();
+        if(bundle != null){
+                urlEndPointEditText.setText(bundle.getString(MenuFragment.URL_ENDPOINTS));
+                awtenatCodeEditText.setText(bundle.getString(MenuFragment.AWTENANTCODE_ENDPOINTS));
+                serverUserEditText.setText(bundle.getString(MenuFragment.SERVER_USER_ENDPOINTS));
+                serverPasswordEditText.setText(bundle.getString(MenuFragment.SERVER_PASSWORD_ENDPOINTS));
+        }
     }
 
     /**

@@ -58,10 +58,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private LoginInterface loginInterface;
     String email;
     String password;
-    public static String URL_ENDPOINTS = "url_endpoints";
-    public static String  AWTENANTCODE_ENDPOINTS = "awtenantcode_endpoints";
-    public static String SERVER_PASSWORD_ENDPOINTS = "serverpassword_endpoints";
-    public static String SERVER_USER_ENDPOINTS = "serveruser_endpoints";
+
     public static String LOGIN_DATA = "Login";
     public static String USER_MAIL = "user_mail";
     public static String USER_PASSWORD = "user_pass";

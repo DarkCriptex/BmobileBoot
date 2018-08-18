@@ -32,6 +32,7 @@ import bmobile.graphs.MainActivityBoot;
 import bmobile.graphs.MenuActivity;
 import bmobile.graphs.MenuAdapter.MenuAdapter;
 import bmobile.graphs.R;
+import bmobile.graphs.UserEndpointsActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,7 +43,13 @@ public class MenuFragment extends Fragment {
 
     private static final String TAG = MenuFragment.class.getSimpleName();
     private static final int MY_PERMISSIONS_READ_PHONE_STATE = 1;
+    public static String URL_ENDPOINTS = "url_endpoints";
+    public static String  AWTENANTCODE_ENDPOINTS = "awtenantcode_endpoints";
+    public static String SERVER_PASSWORD_ENDPOINTS = "serverpassword_endpoints";
+    public static String SERVER_USER_ENDPOINTS = "serveruser_endpoints";
+    public static String PROVEEDOR_NAME = "name";
     public ArrayList<Proveedores>menuList;
+    private int b;
     RecyclerView recyclerView;
     public MenuFragment() {
         // Required empty public constructor
@@ -94,13 +101,22 @@ public class MenuFragment extends Fragment {
        // MenuActivity menuActivity = new MenuActivity();
 
         if (MenuList.get(position).getNameProvider().equals("MobileIron")){
-            getUserEndpoints(position, userEmail, userPass);
-            Intent intent = new Intent(getContext(), MainActivity.class);
-            startActivity(intent);
+           int i = getUserEndpoints(position, userEmail, userPass, name);
+           if (i == 0 ){
+               Intent intent = new Intent(getContext(), MainActivity.class);
+               startActivity(intent);
+           }
+           Log.e("REtunr",  " " + i);
+
+
         }
         else if (MenuList.get(position).getNameProvider().equals("AirWatch")){
+            int i = getUserEndpoints(position, userEmail, userPass, name);
+            if (i == 0 ){
+                permissionsReadPhoneState();
+            }
+            Log.e("REtunr",  " " + i);
 
-            permissionsReadPhoneState();
         }
         else if(MenuList.get(position).getNameProvider().equals("Aruba")){
             Toast.makeText(getContext(), "Lo sentimos esta función aún no esta disponible", Toast.LENGTH_SHORT).show();
@@ -177,18 +193,65 @@ public class MenuFragment extends Fragment {
         }
     }
 
-    private void getUserEndpoints(int position, String mail, String pass){
+    private int getUserEndpoints(final int position, String mail, String pass, final String name){
+
         Call<User<Error>> getUserEndpoints = UserService.getUserEndpoints().login(new LoginBody( mail, pass));
         getUserEndpoints.enqueue(new Callback<User<Error>>() {
             @Override
             public void onResponse(Call<User<Error>> call, Response<User<Error>> response) {
                 Log.e("Response", " " + response.body());
+                if (response.code() == LoginActivity.SUCCESFUL_RESPONSE_CODE && response.isSuccessful()){
+                    try{
+                       ArrayList<Proveedores>proveedores = response.body().proveedores();
+                       if(proveedores.get(position).getUrlEndpoints() == null ||proveedores.get(position).getUrlEndpoints().isEmpty()||
+                          proveedores.get(position).getAwtenantcodeEndpoints() == null ||proveedores.get(position).getAwtenantcodeEndpoints().isEmpty()||
+                          proveedores.get(position).getServeruserEndpoints() == null || proveedores.get(position).getServeruserEndpoints().isEmpty()||
+                          proveedores.get(position).getServerpasswordEndpoints() == null ||proveedores.get(position).getServerpasswordEndpoints().isEmpty()){
+                           b= 1;
+                           Bundle bundle = new Bundle();
+                           bundle.putString(URL_ENDPOINTS, proveedores.get(position).getUrlEndpoints());
+                           bundle.putString(AWTENANTCODE_ENDPOINTS, proveedores.get(position).getAwtenantcodeEndpoints());
+                           bundle.putString(SERVER_USER_ENDPOINTS, proveedores.get(position).getServeruserEndpoints());
+                           bundle.putString(SERVER_PASSWORD_ENDPOINTS, proveedores.get(position).getServerpasswordEndpoints());
+                           bundle.putString(PROVEEDOR_NAME, name);
+                           Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
+                           intent.putExtras(bundle);
+                           startActivity(intent);
+                       }
+                       else {
+                           /*Bundle bundle = new Bundle();
+                           bundle.putString(URL_ENDPOINTS, proveedores.get(position).getUrlEndpoints());
+                           bundle.putString(AWTENANTCODE_ENDPOINTS, proveedores.get(position).getAwtenantcodeEndpoints());
+                           bundle.putString(SERVER_USER_ENDPOINTS, proveedores.get(position).getServeruserEndpoints());
+                           bundle.putString(SERVER_PASSWORD_ENDPOINTS, proveedores.get(position).getServerpasswordEndpoints());
+                           bundle.putString(PROVEEDOR_NAME, name);
+                           Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
+                           intent.putExtras(bundle);
+                           startActivity(intent);*/
+
+                           b = 0;
+                       }
+
+                    }
+                    catch (NullPointerException n){
+                        n.printStackTrace();
+                        Toast.makeText(getContext(), "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
+                        b = 0;
+                    }
+                }
+                else {
+                    Toast.makeText(getContext(), "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
+                    b= 0;
+                }
             }
 
             @Override
             public void onFailure(Call<User<Error>> call, Throwable t) {
                 t.getMessage();
+                Toast.makeText(getContext(), "Ha ocurrido un error intente mas tarde", Toast.LENGTH_SHORT).show();
+                b= 0;
             }
         });
+        return b;
     }
 }

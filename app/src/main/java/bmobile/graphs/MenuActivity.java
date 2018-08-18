@@ -23,23 +23,12 @@ public class MenuActivity extends AppCompatActivity {
     public static final String OPTIONS_MENU = "option_Menu";
 
     FrameLayout frameLayout;
-    public static ArrayList<String>optionsMenu = new ArrayList<String>(){ {
-         /*add("Graficas");
+    /*public static ArrayList<String>optionsMenu = new ArrayList<String>(){ {
+         *//*add("Graficas");
          add("Chat");
-         add("Aruba");*/
-     } };
+         add("Aruba");*//*
+     } };*/
 
-
-    public static ArrayList<String> getList (){
-        return  optionsMenu;
-    }
-    public static void setList(List<Proveedores> list) {
-        for(int i =1; i== list.size(); i++){
-            optionsMenu.add(list.get(i).getNameProvider());
-            Log.e("Lista: ",""+list.get(i).getNameProvider());
-        }
-        return;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +37,7 @@ public class MenuActivity extends AppCompatActivity {
 
         Bundle bundle2 = getIntent().getExtras();
         if(bundle2 != null){
-            ArrayList<Proveedores> proveedores = bundle2.getParcelableArrayList("List");
+            ArrayList<Proveedores> proveedores = bundle2.getParcelableArrayList(LoginActivity.STRING_ARRAYLIS_KEY);
             Bundle bundle = new Bundle();
             bundle.putParcelableArrayList(OPTIONS_MENU,proveedores);
 
