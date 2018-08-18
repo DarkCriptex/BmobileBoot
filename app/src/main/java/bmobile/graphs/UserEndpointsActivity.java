@@ -59,11 +59,13 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
     private UserLoginTask mAuthTask = null;
     private int endpoints_provider_iotdevice;
     private int endpoints_user_iotdevice;
+    private String name;
     // UI references.
     private EditText urlEndPointEditText;
     private EditText serverPasswordEditText;
     private EditText awtenatCodeEditText;
     private EditText serverUserEditText;
+    private TextView titleEndpointTextView;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -76,7 +78,7 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
         // Set up the login form.
         urlEndPointEditText = findViewById(R.id.url_endpoints);
 
-
+        titleEndpointTextView = findViewById(R.id.tituloEndPointsTextView);
         serverPasswordEditText = findViewById(R.id.serverpassword_endpoints);
         serverPasswordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -118,6 +120,8 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
                 serverPasswordEditText.setText(bundle.getString(MenuFragment.SERVER_PASSWORD_ENDPOINTS_KEY));
                 endpoints_user_iotdevice = bundle.getInt(MenuFragment.ENDPOITS_USER_IOTDEVICE_KEY);
                 //endpoints_provider_iotdevice = bundle.getInt(MenuFragment.ENDPOITS_PROVIDER_IOTDEVICE_KEY);
+                name =bundle.getString(MenuFragment.PROVEEDOR_NAME) + " Endpoints";
+                titleEndpointTextView.setText(name);
                 endpoints_provider_iotdevice =0;
                 //endpoints_user_iotdevice = intent.getIntExtra(MenuFragment.ENDPOITS_USER_IOTDEVICE_KEY, -1);
                 //endpoints_provider_iotdevice = intent.getIntExtra(MenuFragment.ENDPOITS_PROVIDER_IOTDEVICE_KEY, -1);
@@ -372,7 +376,7 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
     public void onBackPressed(){
         Intent intent = new Intent(this, MenuActivity.class);
         startActivity(intent);
-        finish();
+        
     }
 }
 

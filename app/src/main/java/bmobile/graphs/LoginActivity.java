@@ -42,6 +42,7 @@ import bmobile.graphs.LoginInterface.LoginBody;
 import bmobile.graphs.LoginInterface.LoginInterface;
 import bmobile.graphs.LoginInterface.Proveedores;
 import bmobile.graphs.LoginInterface.User;
+import bmobile.graphs.LoginInterface.UserService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -54,11 +55,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     public static final int SUCCESFUL_RESPONSE_CODE = 200;
-    private Retrofit restAdapter;
-    private LoginInterface loginInterface;
     String email;
     String password;
-    
+
     public static String LOGIN_DATA = "Login";
     public static String USER_MAIL = "user_mail";
     public static String USER_PASSWORD = "user_pass";
@@ -95,13 +94,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        //Creamos conexion al servicio Rest
-        restAdapter =  new Retrofit.Builder()
-                .baseUrl(LoginInterface.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        loginInterface = restAdapter.create(LoginInterface.class);
         // Set up the login form.
         mEmailView = findViewById(R.id.email);
         //populateAutoComplete();
@@ -197,7 +189,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             //mAuthTask = new UserLoginTask(email, password);
            // mAuthTask.execute((Void) null);
 
-            Call<User<Error>> loginCall = loginInterface.login(new LoginBody(email, password));
+            Call<User<Error>> loginCall = UserService.getUserEndpoints().login(new LoginBody(email, password));
             loginCall.enqueue(new Callback<User<Error>>() {
                 @Override
                 public void onResponse(Call<User<Error>> call, Response<User<Error>> response) {
