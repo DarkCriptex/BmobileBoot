@@ -232,7 +232,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 public void onFailure(Call<User<Error>> call, Throwable t) {
                     showProgress(false);
                     Log.i("Error", " " + t.getMessage());
-                    Toast.makeText(LoginActivity.this, "Ha ocurrido un error, intente más tarde", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Ha ocurrido un error, inténte más tarde", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -399,7 +399,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    public  boolean isOnline(){
+    private   boolean isOnline(){
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnected();
@@ -414,7 +414,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         finish();
     }
 
-    private void showLoginError(String error) {
+    public void showLoginError(String error) {
         Toast.makeText(this, error, Toast.LENGTH_LONG).show();
     }
 

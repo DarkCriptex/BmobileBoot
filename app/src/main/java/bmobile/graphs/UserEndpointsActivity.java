@@ -119,10 +119,10 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
                 serverUserEditText.setText(bundle.getString(MenuFragment.SERVER_USER_ENDPOINTS_KEY));
                 serverPasswordEditText.setText(bundle.getString(MenuFragment.SERVER_PASSWORD_ENDPOINTS_KEY));
                 endpoints_user_iotdevice = bundle.getInt(MenuFragment.ENDPOITS_USER_IOTDEVICE_KEY);
-                //endpoints_provider_iotdevice = bundle.getInt(MenuFragment.ENDPOITS_PROVIDER_IOTDEVICE_KEY);
+                endpoints_provider_iotdevice = bundle.getInt(MenuFragment.ENDPOITS_PROVIDER_IOTDEVICE_KEY);
                 name =bundle.getString(MenuFragment.PROVEEDOR_NAME) + " Endpoints";
                 titleEndpointTextView.setText(name);
-                endpoints_provider_iotdevice =0;
+                //endpoints_provider_iotdevice =0;
                 //endpoints_user_iotdevice = intent.getIntExtra(MenuFragment.ENDPOITS_USER_IOTDEVICE_KEY, -1);
                 //endpoints_provider_iotdevice = intent.getIntExtra(MenuFragment.ENDPOITS_PROVIDER_IOTDEVICE_KEY, -1);
                 Log.e("Bundle" , " " + endpoints_provider_iotdevice + endpoints_user_iotdevice);
@@ -376,7 +376,7 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
     public void onBackPressed(){
         Intent intent = new Intent(this, MenuActivity.class);
         startActivity(intent);
-        
+
     }
 }
 

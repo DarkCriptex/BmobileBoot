@@ -3,6 +3,7 @@ package bmobile.graphs;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -271,5 +272,11 @@ public class MainActivityBoot   extends AppCompatActivity implements View.OnClic
 
     public static void setId(String id) {
         Id = id;
+    }
+    @Override
+    public void onBackPressed(){
+        Intent intent = new Intent(this, MenuActivity.class);
+        startActivity(intent);
+
     }
 }

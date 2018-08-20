@@ -60,14 +60,17 @@ public class MenuFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle bundle = getArguments();
-        menuList = bundle.getParcelableArrayList(MenuActivity.OPTIONS_MENU);
-        if (menuList ==null){
-            Log.d(TAG,"El array esta vacio");
-        }
-        else {
-            
-        }
+
+            Bundle bundle = getArguments();
+            menuList = bundle.getParcelableArrayList(MenuActivity.OPTIONS_MENU);
+            if (menuList ==null){
+                Log.d(TAG,"El array esta vacio");
+            }
+            else {
+
+            }
+
+
 
     }
 
@@ -92,6 +95,8 @@ public class MenuFragment extends Fragment {
         return view;
     }
 
+
+
     private void goToOptionMenuSelected(ArrayList<Proveedores>MenuList, final int position) {
         String name = MenuList.get(position).getNameProvider();
         Toast.makeText(getContext(), ""+name, Toast.LENGTH_SHORT).show();
@@ -107,16 +112,15 @@ public class MenuFragment extends Fragment {
                Intent intent = new Intent(getContext(), MainActivity.class);
                startActivity(intent);
            }
-           Log.e("REtunr",  " " + i);
+           Log.e("Return",  " " + i);
 
 
         }
         else if (MenuList.get(position).getNameProvider().equals("AirWatch")){
-            int i = getUserEndpoints(position, userEmail, userPass, name);
-            if (i == 0 ){
-                permissionsReadPhoneState();
-            }
-            Log.e("REtunr",  " " + i);
+
+                permissionsReadPhoneState(position, userEmail, userPass, name);
+
+            //Log.e("REtunr",  " " + i);
 
         }
         else if(MenuList.get(position).getNameProvider().equals("Aruba")){
@@ -132,7 +136,7 @@ public class MenuFragment extends Fragment {
         void onMenuItemClick(ArrayList<Proveedores> menuList, int position);
     }
 
-    public void permissionsReadPhoneState() {
+    public void permissionsReadPhoneState(int position, String userEmail, String userPass, String name) {
         Log.d("Permission", "entrando al permiso");
         if (ContextCompat.checkSelfPermission(getContext(),
                 Manifest.permission.READ_PHONE_STATE)
@@ -147,8 +151,12 @@ public class MenuFragment extends Fragment {
             String ts = tsLong.toString();
             Log.e("TimeStamp", ts);
             MainActivityBoot.setId(getUniqueIMEIId(getContext())+ts);
-            Intent intent = new Intent(getContext(), MainActivityBoot.class);
-            startActivity(intent);
+            int i = getUserEndpoints(position, userEmail, userPass, name);
+            if (i == 0 ){
+                Intent intent = new Intent(getContext(), MainActivityBoot.class);
+                startActivity(intent);
+            }
+
         }
     }
 
@@ -178,11 +186,11 @@ public class MenuFragment extends Fragment {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(getContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
-                    Long tsLong = System.currentTimeMillis()/1000;
+                   /* Long tsLong = System.currentTimeMillis()/1000;
                     String ts = tsLong.toString();
                     MainActivityBoot.setId(getUniqueIMEIId(getContext())+ts);
                     Intent intent = new Intent(getContext(), MainActivityBoot.class);
-                    startActivity(intent);
+                    startActivity(intent);*/
 
 
                 } else {
@@ -223,10 +231,6 @@ public class MenuFragment extends Fragment {
                                 bundle.putString(AWTENANTCODE_ENDPOINTS_KEY, proveedores.get(position).getAwtenantcodeEndpoints());
                                 bundle.putString(SERVER_USER_ENDPOINTS_KEY, proveedores.get(position).getServeruserEndpoints());
                                 bundle.putString(SERVER_PASSWORD_ENDPOINTS_KEY, proveedores.get(position).getServerpasswordEndpoints());
-
-                                // bundle.putInt(ENDPOITS_PROVIDER_IOTDEVICE_KEY,two);
-                                //bundle.putInt(ENDPOITS_USER_IOTDEVICE_KEY, one);
-                                //bundle.putParcelable(ENDPOITS_USER_IOTDEVICE_KEY,user.getId_user());
                                 bundle.putString(PROVEEDOR_NAME, name);
                                 Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
                                 intent.putExtra(ENDPOITS_USER_IOTDEVICE_KEY, one);
@@ -234,7 +238,7 @@ public class MenuFragment extends Fragment {
                                 intent.putExtras(bundle);
                                 startActivity(intent);
                             } else {
-                                Bundle bundle = new Bundle();
+                               /* Bundle bundle = new Bundle();
                                 bundle.putString(URL_ENDPOINTS_KEY, proveedores.get(position).getUrlEndpoints());
                                 bundle.putString(AWTENANTCODE_ENDPOINTS_KEY, proveedores.get(position).getAwtenantcodeEndpoints());
                                 bundle.putString(SERVER_USER_ENDPOINTS_KEY, proveedores.get(position).getServeruserEndpoints());
@@ -244,7 +248,7 @@ public class MenuFragment extends Fragment {
                                 bundle.putInt(ENDPOITS_USER_IOTDEVICE_KEY, one);
                                 Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
                                 intent.putExtras(bundle);
-                                startActivity(intent);
+                                startActivity(intent);*/
 
                                 b = 0;
                             }
