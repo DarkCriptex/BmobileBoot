@@ -42,6 +42,7 @@ public class MenuFragment extends Fragment {
 
     private static final String TAG = MenuFragment.class.getSimpleName();
     private static final int MY_PERMISSIONS_READ_PHONE_STATE = 1;
+    private static final String USER_ID = "USERID";
     public static String URL_ENDPOINTS_KEY = "url_endpoints";
     public static String AWTENANTCODE_ENDPOINTS_KEY = "awtenantcode_endpoints";
     public static String SERVER_PASSWORD_ENDPOINTS_KEY = "serverpassword_endpoints";
@@ -50,6 +51,7 @@ public class MenuFragment extends Fragment {
     public static String ENDPOITS_PROVIDER_IOTDEVICE_KEY= "endpoints_provider_iotdevice";
     public static String PROVEEDOR_NAME = "name";
     public ArrayList<Proveedores>menuList;
+    private Bundle bundleID;
     private int b;
     RecyclerView recyclerView;
     public MenuFragment() {
@@ -110,6 +112,7 @@ public class MenuFragment extends Fragment {
            int i = getUserEndpoints(position, userEmail, userPass, name);
            if (i == 0 ){
                Intent intent = new Intent(getContext(), MainActivity.class);
+               intent.putExtras(bundleID);
                startActivity(intent);
            }
            Log.e("Return",  " " + i);
@@ -131,10 +134,10 @@ public class MenuFragment extends Fragment {
         }
     }
 
-
     public interface MenuOnClickItem{
         void onMenuItemClick(ArrayList<Proveedores> menuList, int position);
     }
+
 
     public void permissionsReadPhoneState(int position, String userEmail, String userPass, String name) {
         Log.d("Permission", "entrando al permiso");
@@ -210,6 +213,7 @@ public class MenuFragment extends Fragment {
             public void onResponse(Call<User<Error>> call, Response<User<Error>> response) {
                 Log.e("Response", " " + response.body().getId_user());
                 if (response.code() == LoginActivity.SUCCESFUL_RESPONSE_CODE && response.isSuccessful()){
+
                     if(response.body().getError()!= null){
                         Toast.makeText(getContext(), "" + response.body().getError().getText(), Toast.LENGTH_SHORT).show();
                         b=2;
@@ -249,7 +253,7 @@ public class MenuFragment extends Fragment {
                                 Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
                                 intent.putExtras(bundle);
                                 startActivity(intent);*/
-
+                                bundleID.putInt(USER_ID, one);
                                 b = 0;
                             }
 
