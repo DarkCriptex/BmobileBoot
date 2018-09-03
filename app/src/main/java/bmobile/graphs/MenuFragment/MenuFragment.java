@@ -253,7 +253,7 @@ public class MenuFragment extends Fragment {
                                 Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
                                 intent.putExtras(bundle);
                                 startActivity(intent);*/
-                                bundleID.putInt(USER_ID, one);
+                                //bundleID.putInt(USER_ID, one);
                                 b = 0;
                             }
 

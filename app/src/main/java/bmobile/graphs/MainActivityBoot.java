@@ -69,7 +69,7 @@ public class MainActivityBoot extends AppCompatActivity implements View.OnClickL
         initChatView();
         //sendRequest("Hola");
         //Language, Dialogflow Client access token
-        final LanguageConfig config = new LanguageConfig("es", "6ac326242b164ff095f0894a041212ed");
+        final LanguageConfig config = new LanguageConfig("es", "6f50b28ef6ef411eac5d5c0c69369eee");
         initService(config);
         sendRequest("Hola este es el inicio del chat" + " ID " + getId() + " cliente" + " cliente" + " TipoUsuario" + " Bmobile" + " País" + " Mexico");
 
@@ -80,8 +80,8 @@ public class MainActivityBoot extends AppCompatActivity implements View.OnClickL
         //new message
         final Message message = new Message.Builder()
                 .setUser(myAccount)
-                .setRightMessage(true)
-                .setMessageText(chatView.getInputText())
+                .setRight(true)
+                .setText(chatView.getInputText())
                 .hideIcon(true)
                 .build();
         //Set to chat view
@@ -93,7 +93,7 @@ public class MainActivityBoot extends AppCompatActivity implements View.OnClickL
             @Override
             public void onClick(Message message) {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("Message", message.getMessageText());
+                ClipData clip = ClipData.newPlainText("Message", message.getText());
                 clipboard.setPrimaryClip(clip);
                 Toast.makeText(MainActivityBoot.this, "Copy", Toast.LENGTH_SHORT).show();
             }
@@ -182,7 +182,7 @@ public class MainActivityBoot extends AppCompatActivity implements View.OnClickL
 
 
                     // Logging
-                    Log.d(TAG, "onResult");
+                    Log.d(TAG, "onResult" + response.getResult().toString());
                     Log.i(TAG, "Received success response");
                     Log.i(TAG, "Status code: " + status.getCode());
                     Log.i(TAG, "Status type: " + status.getErrorType());
@@ -206,8 +206,8 @@ public class MainActivityBoot extends AppCompatActivity implements View.OnClickL
                     //Update view to bot says
                     final Message receivedMessage = new Message.Builder()
                             .setUser(droidKaigiBot)
-                            .setRightMessage(false)
-                            .setMessageText(speech)
+                            .setRight(false)
+                            .setText(speech)
                             .hideIcon(true)
                             .build();
                     chatView.receive(receivedMessage);
@@ -215,7 +215,7 @@ public class MainActivityBoot extends AppCompatActivity implements View.OnClickL
                         @Override
                         public void onClick(Message message) {
                             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                            ClipData clip = ClipData.newPlainText("Message", message.getMessageText());
+                            ClipData clip = ClipData.newPlainText("Message", message.getText());
                             clipboard.setPrimaryClip(clip);
                             Toast.makeText(MainActivityBoot.this, "Copy", Toast.LENGTH_SHORT).show();
                         }
@@ -264,7 +264,7 @@ public class MainActivityBoot extends AppCompatActivity implements View.OnClickL
             @Override
             public void onClick(Message message) {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("Message", message.getMessageText());
+                ClipData clip = ClipData.newPlainText("Message", message.getText());
                 clipboard.setPrimaryClip(clip);
                 Toast.makeText(MainActivityBoot.this, "Copy", Toast.LENGTH_SHORT).show();
             }
