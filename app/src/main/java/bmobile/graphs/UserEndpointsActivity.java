@@ -3,22 +3,20 @@ package bmobile.graphs;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
-
+import android.content.Context;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -33,7 +31,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import bmobile.graphs.LoginInterface.Error;
+import bmobile.graphs.ErrorBody.Status;
 import bmobile.graphs.MenuFragment.MenuFragment;
 import bmobile.graphs.UserConfigInterface.ResponseUserConfig;
 import bmobile.graphs.UserConfigInterface.UserConfigBody;
@@ -166,7 +164,7 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
             focusView = urlEndPointEditText;
             cancel = true;
         } else if (!isURLValid(urlEndpoits)) {
-            urlEndPointEditText.setError(getString(R.string.error_invalid_email));
+            urlEndPointEditText.setError(getString(R.string.error_invalid_url));
             focusView = urlEndPointEditText;
             cancel = true;
         }
@@ -188,15 +186,15 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            Call<ResponseUserConfig<Error>> saveUserConfig = UserConfigService.saveUserConfig().userConfig(new UserConfigBody(urlEndpoits, awtenantCode, serverUser, serverPassword, endpoints_user_iotdevice, endpoints_provider_iotdevice));
-            saveUserConfig.enqueue(new Callback<ResponseUserConfig<Error>>() {
+            Call<ResponseUserConfig<Status>> saveUserConfig = UserConfigService.saveUserConfig().userConfig(new UserConfigBody(urlEndpoits, awtenantCode, serverUser, serverPassword, endpoints_user_iotdevice, endpoints_provider_iotdevice));
+            saveUserConfig.enqueue(new Callback<ResponseUserConfig<Status>>() {
                 @Override
-                public void onResponse(Call<ResponseUserConfig<Error>> call, Response<ResponseUserConfig<Error>> response) {
+                public void onResponse(Call<ResponseUserConfig<Status>> call, Response<ResponseUserConfig<Status>> response) {
                     showProgress(false);
                     Log.e("ResposUserConfig", " " + response.body().getIdEndpoints());
                     if (response.isSuccessful() && response.code() == LoginActivity.SUCCESFUL_RESPONSE_CODE){
-                        if(response.body().getError()!= null){
-                            Toast.makeText(UserEndpointsActivity.this, "" + response.body().getError().getText(), Toast.LENGTH_SHORT).show();
+                        if(response.body().getStatus()!= null){
+                            Toast.makeText(UserEndpointsActivity.this, "" + response.body().getStatus().getDescription(), Toast.LENGTH_SHORT).show();
                         }
                         else {
                             startAvtivictyOnSuccesLogin();
@@ -209,7 +207,7 @@ public class UserEndpointsActivity extends AppCompatActivity implements LoaderCa
                 }
 
                 @Override
-                public void onFailure(Call<ResponseUserConfig<Error>> call, Throwable t) {
+                public void onFailure(Call<ResponseUserConfig<Status>> call, Throwable t) {
                     showProgress(false);
                     t.getMessage();
                 }

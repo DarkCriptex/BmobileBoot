@@ -1,8 +1,12 @@
 package bmobile.graphs.Chart;
 
 
+import android.content.Intent;
+import android.hardware.Sensor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,26 +24,61 @@ import com.anychart.anychart.Set;
 import com.anychart.anychart.Stroke;
 import com.anychart.anychart.TooltipPositionMode;
 import com.anychart.anychart.ValueDataEntry;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
+import org.jetbrains.annotations.Nullable;
+
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import bmobile.graphs.ErrorBody.Status;
+import bmobile.graphs.LoginActivity;
 import bmobile.graphs.MainActivity;
+import bmobile.graphs.MenuActivity;
+import bmobile.graphs.ObtenerDatosSensorInterface.ArraySensorData;
+import bmobile.graphs.ObtenerDatosSensorInterface.GetSensorDataInterface;
+import bmobile.graphs.ObtenerDatosSensorInterface.GetSensorDataService;
+import bmobile.graphs.ObtenerDatosSensorInterface.SensorData;
+import bmobile.graphs.ObtenerSensoresInterface.Sensores;
 import bmobile.graphs.R;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class ChartFragment extends Fragment {
     List<DataEntry> seriesData;
+    ArrayList<SensorData> sensorData;
+    ArrayList<Sensores> arrayFomBundle;
     Set set;
     Mapping series1Mapping ;
     Mapping series2Mapping ;
     Mapping series3Mapping;
+
+    Mapping temperature;
+    Mapping hightemp;
+    Mapping lowtemp;
+    Mapping humidity;
+    Mapping highhum;
+    Mapping lowhum;
+    Mapping consume;
+    Mapping stream;
+
     CartesianSeriesLine series1;
     CartesianSeriesLine series2;
     CartesianSeriesLine series3;
+    CartesianSeriesLine series4;
+    CartesianSeriesLine series5;
+    CartesianSeriesLine series6;
+    CartesianSeriesLine series7;
+    CartesianSeriesLine series8;
+
     Cartesian cartesian = AnyChart.line();
     AnyChartView anyChartView;
     int position;
+    int id_device;
 
 
 
@@ -58,17 +97,19 @@ public class ChartFragment extends Fragment {
         if (bundle != null) {
 
             position = bundle.getInt(MainActivity.POSITION_KEY);
+            arrayFomBundle = bundle.getParcelableArrayList(MainActivity.SENSORES_DATA);
         }
         else {
             position = 0;
         }
-
+        Log.e("Array", ""+ arrayFomBundle);
+         new asyncTask().execute();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Toast.makeText(getContext(), "Pocision desde fragment: "+ position, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(getContext(), "Pocision desde fragment: "+ position, Toast.LENGTH_SHORT).show();
         View view = inflater.inflate(R.layout.fragment_chart, container, false);
         anyChartView = view.findViewById(R.id.any_chart_view);
         anyChartView.setProgressBar(view.findViewById(R.id.progress_bar));
@@ -84,12 +125,13 @@ public class ChartFragment extends Fragment {
 
         cartesian.getTooltip().setPositionMode(TooltipPositionMode.POINT);
 
-        cartesian.setTitle("Trend of Sales of the Most Popular Products of ACME Corp.");
+        cartesian.setTitle("Monitoreo de Sensores");
 
-        cartesian.getYAxis().setTitle("Number of Bottles Sold (thousands)");
+        cartesian.getYAxis().setTitle("Parametro de medición (thousands)");
         cartesian.getXAxis().getLabels().setPadding(5d, 5d, 5d, 5d);
 
-        Chart(position);
+        //Chart(position);
+        //fillChart();
 
         cartesian.getLegend().setEnabled(true);
         cartesian.getLegend().setFontSize(13d);
@@ -101,85 +143,74 @@ public class ChartFragment extends Fragment {
     }
     private class CustomDataEntry extends ValueDataEntry {
 
-        CustomDataEntry(String x, Number value, Number value2, Number value3) {
+        CustomDataEntry(String x, Number value, Number value2, Number value3, Number value4,Number value5,Number value6,Number value7,Number value8) {
             super(x, value);
             setValue("value2", value2);
             setValue("value3", value3);
+            setValue("value4", value4);
+            setValue("value5", value5);
+            setValue("value6", value6);
+            setValue("value7", value7);
+            setValue("value8", value8);
         }
 
     }
 
-    private void Chart(int position){
-        switch (position){
-            case 0:
+
+    public void  getsensorData (int position, ArrayList<Sensores> sensores){
+        String uniquenumber_device = sensores.get(position).getUniquenumberDevice();
+        final int id_device1 = sensores.get(position).getIdDevice();
+        //String uniquenumber_device = "M-636693458406042207";
+        //int id_device = 3;
+        if (uniquenumber_device != null) {
+
+            Call<ArraySensorData<Status>> getData = GetSensorDataService.getSensorData().getSensorData(uniquenumber_device, id_device1);
+            getData.enqueue(new Callback<ArraySensorData<Status>>() {
+                @Override
+                public void onResponse(Call<ArraySensorData<Status>> call, Response<ArraySensorData<Status>> response) {
+
+                    if (response.code() == LoginActivity.SUCCESFUL_RESPONSE_CODE && response.isSuccessful()) {
+                        if (response.body().getStatus() != null) {
+                            Toast.makeText(getContext(), "" + response.body().getStatus().getDescription(), Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(getContext(), MenuActivity.class);
+                            startActivity(intent);
+                        } else {
+                            //sensorData = response.body().getSensorData();
+                            setChart(response.body().getSensorData(), id_device1);
+                            //Log.e("Datos del sensor", "" + sensorData.toString());
+                        }
+                    } else {
+                        Toast.makeText(getContext(), "Ha ocurrido un error", Toast.LENGTH_SHORT).show();
+                        /*Intent intent = new Intent(getContext(), MenuActivity.class);
+                        startActivity(intent);*/
+                        Log.e("OnResponseFail", "" + response.body().toString());
+                    }
+                }
+
+
+                @Override
+                public void onFailure(Call<ArraySensorData<Status>> call, Throwable t) {
+                    t.getMessage();
+                    Log.e("ErrorSensores", "" + t.getMessage());
+                }
+            });
+
+
+
+        }
+    }
+
+    private void fillChart(int id_device){
+        if (sensorData != null) {
+
+            int size = sensorData.size();
+            if (size > 0) {
                 seriesData = new ArrayList<>();
-                seriesData.add(new CustomDataEntry("1986", 3.6, 2.3, 2.8));
-                seriesData.add(new CustomDataEntry("1987", 7.1, 4.0, 4.1));
-                seriesData.add(new CustomDataEntry("1988", 8.5, 6.2, 5.1));
-                seriesData.add(new CustomDataEntry("1989", 9.2, 11.8, 6.5));
-                seriesData.add(new CustomDataEntry("1990", 10.1, 13.0, 12.5));
-                seriesData.add(new CustomDataEntry("1991", 11.6, 13.9, 18.0));
-                seriesData.add(new CustomDataEntry("1992", 16.4, 18.0, 21.0));
-                seriesData.add(new CustomDataEntry("1993", 18.0, 23.3, 20.3));
-                seriesData.add(new CustomDataEntry("1994", 13.2, 24.7, 19.2));
-                seriesData.add(new CustomDataEntry("1995", 12.0, 18.0, 14.4));
-                seriesData.add(new CustomDataEntry("1996", 3.2, 15.1, 9.2));
-                seriesData.add(new CustomDataEntry("1997", 4.1, 11.3, 5.9));
-                seriesData.add(new CustomDataEntry("1998", 6.3, 14.2, 5.2));
-                seriesData.add(new CustomDataEntry("1999", 9.4, 13.7, 4.7));
-                seriesData.add(new CustomDataEntry("2000", 11.5, 9.9, 4.2));
-                seriesData.add(new CustomDataEntry("2001", 13.5, 12.1, 1.2));
-                seriesData.add(new CustomDataEntry("2002", 14.8, 13.5, 5.4));
-                seriesData.add(new CustomDataEntry("2003", 16.6, 15.1, 6.3));
-                seriesData.add(new CustomDataEntry("2004", 18.1, 17.9, 8.9));
-                seriesData.add(new CustomDataEntry("2005", 17.0, 18.9, 10.1));
-                seriesData.add(new CustomDataEntry("2006", 16.6, 20.3, 11.5));
-                seriesData.add(new CustomDataEntry("2007", 14.1, 20.7, 12.2));
-                seriesData.add(new CustomDataEntry("2008", 15.7, 21.6, 10));
-                seriesData.add(new CustomDataEntry("2009", 12.0, 22.5, 8.9));
-
-                set = new Set(seriesData);
-                series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
-                series2Mapping = set.mapAs("{ x: 'x', value: 'value2' }");
-                series3Mapping = set.mapAs("{ x: 'x', value: 'value3' }");
-
-                series1 = cartesian.line(series1Mapping);
-                series1.setName("Brandy");
-                series1.getHovered().getMarkers().setEnabled(true);
-                series1.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series1.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
-
-                series2 = cartesian.line(series2Mapping);
-                series2.setName("Whiskey");
-                series2.getHovered().getMarkers().setEnabled(true);
-                series2.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series2.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
-
-                series3 = cartesian.line(series3Mapping);
-                series3.setName("Tequila");
-                series3.getHovered().getMarkers().setEnabled(true);
-                series3.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series3.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
-                break;
-            case 1:
+                for (int i = 0; i < size; i++) {
+                    seriesData.add(new CustomDataEntry(sensorData.get(i).getTimestamp_monitoring(), sensorData.get(i).getTemperatureMonitoring(), sensorData.get(i).getHightempMonitoring(),
+                            sensorData.get(i).getLowtempMonitoring(), sensorData.get(i).getHumidityMonitoring(), sensorData.get(i).getHighhumMonitoring(), sensorData.get(i).getLowhumMonitoring(),
+                            sensorData.get(i).getConsume_monitoring(), sensorData.get(i).getStream_monitoring()));
+                }
                 cartesian.setAnimation(true);
 
                 cartesian.setPadding(10d, 20d, 5d, 20d);
@@ -191,255 +222,244 @@ public class ChartFragment extends Fragment {
 
                 cartesian.getTooltip().setPositionMode(TooltipPositionMode.POINT);
 
-                cartesian.setTitle("Trend of Sales of the Most Popular Products of ACME Corp.");
+                cartesian.setTitle("Monitoreo de Sensores");
 
-                cartesian.getYAxis().setTitle("Number of Bottles Sold (thousands)");
+                cartesian.getYAxis().setTitle("Parametros de Medición ");
                 cartesian.getXAxis().getLabels().setPadding(5d, 5d, 5d, 5d);
-
-                seriesData = new ArrayList<>();
-
-                seriesData.add(new CustomDataEntry("1986", 4.6, 12.3, 2.8));
-                seriesData.add(new CustomDataEntry("1987", 6.1, 14.0, 3.1));
-                seriesData.add(new CustomDataEntry("1988", 7.5, 16.2, 1.1));
-                seriesData.add(new CustomDataEntry("1989", 8.2, 1.8, 16.5));
-                seriesData.add(new CustomDataEntry("1990", 11.1, 3.0, 22.5));
-                seriesData.add(new CustomDataEntry("1991", 12.6, 15.9, 14.0));
-                seriesData.add(new CustomDataEntry("1992", 15.4, 12.0, 11.0));
-                seriesData.add(new CustomDataEntry("1993", 17.0, 13.3, 10.3));
-                seriesData.add(new CustomDataEntry("1994", 12.2, 14.7, 9.2));
-                seriesData.add(new CustomDataEntry("1995", 15.0, 28.0, 4.4));
-                seriesData.add(new CustomDataEntry("1996", 1.2, 12.1, 19.2));
-                seriesData.add(new CustomDataEntry("1997", 2.1, 10.3, 15.9));
-                seriesData.add(new CustomDataEntry("1998", 3.3, 11.2, 15.2));
-                seriesData.add(new CustomDataEntry("1999", 3.4, 16.7, 14.7));
-                seriesData.add(new CustomDataEntry("2000", 21.5, 19.9, 2.2));
-                seriesData.add(new CustomDataEntry("2001", 23.5, 22.1, 2.2));
-                seriesData.add(new CustomDataEntry("2002", 24.8, 23.5, 15.4));
-                seriesData.add(new CustomDataEntry("2003", 11.6, 25.1, 16.3));
-                seriesData.add(new CustomDataEntry("2004", 11.1, 27.9, 18.9));
-                seriesData.add(new CustomDataEntry("2005", 15.0, 11.9, 12.1));
-                seriesData.add(new CustomDataEntry("2006", 17.6, 10.3, 12.5));
-                seriesData.add(new CustomDataEntry("2007", 11.1, 10.7, 14.2));
-                seriesData.add(new CustomDataEntry("2008", 11.7, 11.6, 11));
-                seriesData.add(new CustomDataEntry("2009", 2.0, 12.5, 18.9));
-
                 set = new Set(seriesData);
+
                 series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
                 series2Mapping = set.mapAs("{ x: 'x', value: 'value2' }");
                 series3Mapping = set.mapAs("{ x: 'x', value: 'value3' }");
 
-                series1 = cartesian.line(series1Mapping);
-                series1.setName("Brandy");
-                series1.getHovered().getMarkers().setEnabled(true);
-                series1.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series1.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
+                temperature = set.mapAs("{ x: 'x', value: 'value' }");
+                hightemp = set.mapAs("{ x: 'x', value: 'value2' }");
+                lowtemp = set.mapAs("{ x: 'x', value: 'value3' }");
+                humidity = set.mapAs("{ x: 'x', value: 'value4' }");
+                highhum = set.mapAs("{ x: 'x', value: 'value5' }");
+                lowhum = set.mapAs("{ x: 'x', value: 'value6' }");
+                consume = set.mapAs("{ x: 'x', value: 'value7' }");
+                stream = set.mapAs("{ x: 'x', value: 'value8' }");
+                switch (id_device){
+                    case 1:
+                        if (temperature != null) {
+                            series1 = cartesian.line(temperature);
+                            series1.setName("Temperatura");
+                            series1.getHovered().getMarkers().setEnabled(true);
 
-                series2 = cartesian.line(series2Mapping);
-                series2.setName("Whiskey");
-                series2.getHovered().getMarkers().setEnabled(true);
-                series2.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series2.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
+                        }
+                        if(hightemp != null){
+                            series2 = cartesian.line(hightemp);
+                            series2.setName("Temperatura más alta");
+                            series2.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series2.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        if(lowtemp != null){
+                            series3 = cartesian.line(lowtemp);
+                            series3.setName("Temperatura más baja");
+                            series3.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series3.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        if(humidity != null){
+                            series4 = cartesian.line(humidity);
+                            series4.setName("Humedad");
+                            series4.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series4.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        if(highhum != null){
+                            series5 = cartesian.line(highhum);
+                            series5.setName("Nivel de humedad más alto");
+                            series5.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series5.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        if(lowhum != null){
+                            series6 = cartesian.line(lowhum);
+                            series6.setName("Nivel de humedad más bajo");
+                            series6.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series6.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        break;
+                    case 2:
+                        if(consume != null){
+                            series7 = cartesian.line(consume);
+                            series7.setName("Consumo");
+                            series7.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series7.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        if(stream != null){
 
-                series3 = cartesian.line(series3Mapping);
-                series3.setName("Tequila");
-                series3.getHovered().getMarkers().setEnabled(true);
-                series3.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series3.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
-                break;
-            case 2:
-                cartesian.setAnimation(true);
+                            series8 = cartesian.line(stream);
+                            series8.setName("Stream");
+                            series8.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series8.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        break;
+                    case 3:
+                        if (temperature != null) {
+                            series1 = cartesian.line(temperature);
+                            series1.setName("Temperatura");
+                            series1.getHovered().getMarkers().setEnabled(true);
 
-                cartesian.setPadding(10d, 20d, 5d, 20d);
+                        }
+                        if(hightemp != null){
+                            series2 = cartesian.line(hightemp);
+                            series2.setName("Temperatura más alta");
+                            series2.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series2.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        if(lowtemp != null){
+                            series3 = cartesian.line(lowtemp);
+                            series3.setName("Temperatura más baja");
+                            series3.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series3.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        if(humidity != null){
+                            series4 = cartesian.line(humidity);
+                            series4.setName("Humedad");
+                            series4.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series4.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        if(highhum != null){
+                            series5 = cartesian.line(highhum);
+                            series5.setName("Nivel de humedad más alto");
+                            series5.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series5.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        if(lowhum != null){
+                            series6 = cartesian.line(lowhum);
+                            series6.setName("Nivel de humedad más bajo");
+                            series6.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series6.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        if(consume != null){
+                            series7 = cartesian.line(consume);
+                            series7.setName("Consumo");
+                            series7.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series7.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        if(stream != null){
 
-                cartesian.getCrosshair().setEnabled(true);
-                cartesian.getCrosshair()
-                        .setYLabel(true)
-                        .setYStroke((Stroke) null, null, null, null, null);
-
-                cartesian.getTooltip().setPositionMode(TooltipPositionMode.POINT);
-
-                cartesian.setTitle("Trend of Sales of the Most Popular Products of ACME Corp.");
-
-                cartesian.getYAxis().setTitle("Number of Bottles Sold (thousands)");
-                cartesian.getXAxis().getLabels().setPadding(5d, 5d, 5d, 5d);
-
-                seriesData = new ArrayList<>();
-                seriesData.add(new CustomDataEntry("1986", 23.6, 12.3, 12.8));
-                seriesData.add(new CustomDataEntry("1987", 27.1, 14.0, 14.1));
-                seriesData.add(new CustomDataEntry("1988", 18.5, 16.2, 15.1));
-                seriesData.add(new CustomDataEntry("1989", 19.2, 21.8, 16.5));
-                seriesData.add(new CustomDataEntry("1990", 12.1, 23.0, 22.5));
-                seriesData.add(new CustomDataEntry("1991", 12.6, 23.9, 28.0));
-                seriesData.add(new CustomDataEntry("1992", 14.4, 28.0, 1.0));
-                seriesData.add(new CustomDataEntry("1993", 28.0, 13.3, 10.3));
-                seriesData.add(new CustomDataEntry("1994", 23.2, 14.7, 9.2));
-                seriesData.add(new CustomDataEntry("1995", 22.0, 28.0, 4.4));
-                seriesData.add(new CustomDataEntry("1996", 23.2, 25.1, 19.2));
-                seriesData.add(new CustomDataEntry("1997", 24.1, 18.3, 15.9));
-                seriesData.add(new CustomDataEntry("1998", 16.3, 17.2, 15.2));
-                seriesData.add(new CustomDataEntry("1999", 19.4, 16.7, 24.7));
-                seriesData.add(new CustomDataEntry("2000", 1.5, 19.9, 14.2));
-                seriesData.add(new CustomDataEntry("2001", 3.5, 22.1, 21.2));
-                seriesData.add(new CustomDataEntry("2002", 24.8, 23.5, 25.4));
-                seriesData.add(new CustomDataEntry("2003", 26.6, 5.1, 26.3));
-                seriesData.add(new CustomDataEntry("2004", 8.1, 7.9, 8.9));
-                seriesData.add(new CustomDataEntry("2005", 7.0, 8.9, 10.1));
-                seriesData.add(new CustomDataEntry("2006", 6.6, 22.3, 21.5));
-                seriesData.add(new CustomDataEntry("2007", 4.1, 25.7, 22.2));
-                seriesData.add(new CustomDataEntry("2008", 5.7, 11.6, 10));
-                seriesData.add(new CustomDataEntry("2009", 2.0, 12.5, 8.9));
-
-                set = new Set(seriesData);
-                series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
-                series2Mapping = set.mapAs("{ x: 'x', value: 'value2' }");
-                series3Mapping = set.mapAs("{ x: 'x', value: 'value3' }");
-
-                series1 = cartesian.line(series1Mapping);
-                series1.setName("Brandy");
-                series1.getHovered().getMarkers().setEnabled(true);
-                series1.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series1.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
-
-                series2 = cartesian.line(series2Mapping);
-                series2.setName("Whiskey");
-                series2.getHovered().getMarkers().setEnabled(true);
-                series2.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series2.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
-
-                series3 = cartesian.line(series3Mapping);
-                series3.setName("Tequila");
-                series3.getHovered().getMarkers().setEnabled(true);
-                series3.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series3.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
-                break;
-            case 3:
-                cartesian.setAnimation(true);
-
-                cartesian.setPadding(10d, 20d, 5d, 20d);
-
-                cartesian.getCrosshair().setEnabled(true);
-                cartesian.getCrosshair()
-                        .setYLabel(true)
-                        .setYStroke((Stroke) null, null, null, null, null);
-
-                cartesian.getTooltip().setPositionMode(TooltipPositionMode.POINT);
-
-                cartesian.setTitle("Trend of Sales of the Most Popular Products of ACME Corp.");
-
-                cartesian.getYAxis().setTitle("Number of Bottles Sold (thousands)");
-                cartesian.getXAxis().getLabels().setPadding(5d, 5d, 5d, 5d);
-
-                seriesData = new ArrayList<>();
-                seriesData.add(new CustomDataEntry("1986", 13.6, 22.3, 12.8));
-                seriesData.add(new CustomDataEntry("1987", 27.1, 24.0, 14.1));
-                seriesData.add(new CustomDataEntry("1988", 28.5, 26.2, 15.1));
-                seriesData.add(new CustomDataEntry("1989", 29.2, 1.8, 16.5));
-                seriesData.add(new CustomDataEntry("1990", 20.1, 23.0, 22.5));
-                seriesData.add(new CustomDataEntry("1991", 21.6, 23.9, 8.0));
-                seriesData.add(new CustomDataEntry("1992", 26.4, 8.0, 1.0));
-                seriesData.add(new CustomDataEntry("1993", 28.0, 13.3, 22.3));
-                seriesData.add(new CustomDataEntry("1994", 23.2, 14.7, 9.2));
-                seriesData.add(new CustomDataEntry("1995", 22.0, 8.0, 24.4));
-                seriesData.add(new CustomDataEntry("1996", 23.2, 5.1, 19.2));
-                seriesData.add(new CustomDataEntry("1997", 24.1, 1.3, 15.9));
-                seriesData.add(new CustomDataEntry("1998", 26.3, 4.2, 15.2));
-                seriesData.add(new CustomDataEntry("1999", 29.4, 3.7, 14.7));
-                seriesData.add(new CustomDataEntry("2000", 21.5, 19.9, 14.2));
-                seriesData.add(new CustomDataEntry("2001", 23.5, 2.1, 11.2));
-                seriesData.add(new CustomDataEntry("2002", 24.8, 3.5, 15.4));
-                seriesData.add(new CustomDataEntry("2003", 16.6, 5.1, 16.3));
-                seriesData.add(new CustomDataEntry("2004", 18.1, 7.9, 18.9));
-                seriesData.add(new CustomDataEntry("2005", 17.0, 8.9, 11.1));
-                seriesData.add(new CustomDataEntry("2006", 16.6, 10.3, 21.5));
-                seriesData.add(new CustomDataEntry("2007", 14.1, 10.7, 22.2));
-                seriesData.add(new CustomDataEntry("2008", 15.7, 11.6, 20));
-                seriesData.add(new CustomDataEntry("2009", 2.0, 12.5, 18.9));
-
-                set = new Set(seriesData);
-                series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
-                series2Mapping = set.mapAs("{ x: 'x', value: 'value2' }");
-                series3Mapping = set.mapAs("{ x: 'x', value: 'value3' }");
-
-                series1 = cartesian.line(series1Mapping);
-                series1.setName("Brandy");
-                series1.getHovered().getMarkers().setEnabled(true);
-                series1.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series1.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
-
-                series2 = cartesian.line(series2Mapping);
-                series2.setName("Whiskey");
-                series2.getHovered().getMarkers().setEnabled(true);
-                series2.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series2.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
-
-                series3 = cartesian.line(series3Mapping);
-                series3.setName("Tequila");
-                series3.getHovered().getMarkers().setEnabled(true);
-                series3.getHovered().getMarkers()
-                        .setType(MarkerType.CIRCLE)
-                        .setSize(4d);
-                series3.getTooltip()
-                        .setPosition("right")
-                        .setAnchor(EnumsAnchor.LEFT_CENTER)
-                        .setOffsetX(5d)
-                        .setOffsetY(5d);
+                            series8 = cartesian.line(stream);
+                            series8.setName("Stream");
+                            series8.getHovered().getMarkers()
+                                    .setType(MarkerType.CIRCLE)
+                                    .setSize(4d);
+                            series8.getTooltip()
+                                    .setPosition("right")
+                                    .setAnchor(EnumsAnchor.LEFT_CENTER)
+                                    .setOffsetX(5d)
+                                    .setOffsetY(5d);
+                        }
+                        break;
+                    default:
+                        Log.e("Ocurrio un error", "ID_device no existe");
+                        break;
+                }
 
                 cartesian.getLegend().setEnabled(true);
                 cartesian.getLegend().setFontSize(13d);
                 cartesian.getLegend().setPadding(0d, 0d, 10d, 0d);
-                break;
-            default:
-                break;
+            }
+        }
+    }
+
+    private void setChart(ArrayList<SensorData> sensorData, int id_device){
+        this.sensorData = sensorData;
+        this.id_device = id_device;
+        Log.e("ArraySensorsData",""+ this.sensorData);
+        fillChart(this.id_device);
+    }
+
+    public class asyncTask extends AsyncTask<Void, Void, Void>{
+
+
+        @Override
+        protected Void doInBackground(Void... strings) {
+
+                getsensorData(position, arrayFomBundle);
+
+
+
+            return null;
         }
 
     }
-
 }

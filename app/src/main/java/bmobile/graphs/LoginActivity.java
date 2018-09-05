@@ -3,24 +3,21 @@ package bmobile.graphs;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Parcelable;
-import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
-
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -37,17 +34,15 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import bmobile.graphs.LoginInterface.Error;
+import bmobile.graphs.ErrorBody.Status;
 import bmobile.graphs.LoginInterface.LoginBody;
-import bmobile.graphs.LoginInterface.LoginInterface;
 import bmobile.graphs.LoginInterface.Proveedores;
 import bmobile.graphs.LoginInterface.User;
 import bmobile.graphs.LoginInterface.UserService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+
 
 /**
  * A login screen that offers login via email/password.
@@ -189,10 +184,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             //mAuthTask = new UserLoginTask(email, password);
            // mAuthTask.execute((Void) null);
 
-            Call<User<Error>> loginCall = UserService.getUserEndpoints().login(new LoginBody(email, password));
-            loginCall.enqueue(new Callback<User<Error>>() {
+            Call<User<Status>> loginCall = UserService.getUserEndpoints().login(new LoginBody(email, password));
+            loginCall.enqueue(new Callback<User<Status>>() {
                 @Override
-                public void onResponse(Call<User<Error>> call, Response<User<Error>> response) {
+                public void onResponse(Call<User<Status>> call, Response<User<Status>> response) {
                     Log.d("Respuesta :", "" + response.body() + " Respuesta " + response.code() + response.isSuccessful());
 
                     showProgress(false);
@@ -203,8 +198,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                       try {
 
-                        if( response.body().getError()!= null){
-                            Toast.makeText(LoginActivity.this, "" + response.body().getError().getText(), Toast.LENGTH_SHORT).show();
+                        if( response.body().getStatus()!= null){
+                            Toast.makeText(LoginActivity.this, "" + response.body().getStatus().getDescription(), Toast.LENGTH_SHORT).show();
                         }
 
                         else {
@@ -229,7 +224,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
                 @Override
-                public void onFailure(Call<User<Error>> call, Throwable t) {
+                public void onFailure(Call<User<Status>> call, Throwable t) {
                     showProgress(false);
                     Log.i("Error", " " + t.getMessage());
                     Toast.makeText(LoginActivity.this, "Ha ocurrido un error, inténte más tarde", Toast.LENGTH_SHORT).show();

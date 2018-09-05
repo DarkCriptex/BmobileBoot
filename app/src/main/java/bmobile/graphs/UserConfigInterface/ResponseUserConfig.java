@@ -9,19 +9,10 @@ public class ResponseUserConfig <T>{
     @SerializedName("id_endpoints")
     @Expose
     private Integer idEndpoints;
-    @SerializedName("error")
+    @SerializedName("status")
     @Expose
     @Nullable
-    private T error;
-    @Nullable
-    public T getError() {
-        return error;
-    }
-
-    public void setError(@Nullable T error) {
-        this.error = error;
-    }
-
+    private T status;
 
     public Integer getIdEndpoints() {
         return idEndpoints;
@@ -31,11 +22,20 @@ public class ResponseUserConfig <T>{
         this.idEndpoints = idEndpoints;
     }
 
+    @Nullable
+    public T getStatus() {
+        return status;
+    }
+
+    public void setStatus(@Nullable T status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "ResponseUserConfig{" +
                 "idEndpoints=" + idEndpoints +
-                ", error=" + error +
+                ", error=" + status +
                 '}';
     }
 }

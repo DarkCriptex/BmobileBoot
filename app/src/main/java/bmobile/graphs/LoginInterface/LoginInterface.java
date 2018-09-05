@@ -1,15 +1,8 @@
 package bmobile.graphs.LoginInterface;
 
-import org.intellij.lang.annotations.JdkConstants;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-
+import bmobile.graphs.ErrorBody.Status;
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
@@ -19,6 +12,6 @@ public interface LoginInterface {
 
     @Headers( "Content-Type: application/json")
     @POST("utils/obtenerDatosLogin")
-    Call<User<Error>>login(@Body LoginBody loginBody);
+    Call<User<Status>>login(@Body LoginBody loginBody);
 
 }

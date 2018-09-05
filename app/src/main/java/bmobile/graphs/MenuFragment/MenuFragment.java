@@ -6,9 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,12 +20,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import bmobile.graphs.Chart.ChartFragment;
+import bmobile.graphs.ErrorBody.Status;
 import bmobile.graphs.LoginActivity;
-import bmobile.graphs.LoginInterface.Error;
 import bmobile.graphs.LoginInterface.LoginBody;
 import bmobile.graphs.LoginInterface.Proveedores;
 import bmobile.graphs.LoginInterface.User;
@@ -31,6 +36,10 @@ import bmobile.graphs.MainActivity;
 import bmobile.graphs.MainActivityBoot;
 import bmobile.graphs.MenuActivity;
 import bmobile.graphs.MenuAdapter.MenuAdapter;
+import bmobile.graphs.ObtenerSensoresInterface.GetSensorsBody;
+import bmobile.graphs.ObtenerSensoresInterface.Sensores;
+import bmobile.graphs.ObtenerSensoresInterface.SensorsBody;
+import bmobile.graphs.ObtenerSensoresInterface.SensorsService;
 import bmobile.graphs.R;
 import bmobile.graphs.UserEndpointsActivity;
 import retrofit2.Call;
@@ -42,7 +51,8 @@ public class MenuFragment extends Fragment {
 
     private static final String TAG = MenuFragment.class.getSimpleName();
     private static final int MY_PERMISSIONS_READ_PHONE_STATE = 1;
-    private static final String USER_ID = "USERID";
+    public static final String ARRAY_SENSORES = "array_sensores";
+    public static  Integer USERS_ID;
     public static String URL_ENDPOINTS_KEY = "url_endpoints";
     public static String AWTENANTCODE_ENDPOINTS_KEY = "awtenantcode_endpoints";
     public static String SERVER_PASSWORD_ENDPOINTS_KEY = "serverpassword_endpoints";
@@ -51,7 +61,7 @@ public class MenuFragment extends Fragment {
     public static String ENDPOITS_PROVIDER_IOTDEVICE_KEY= "endpoints_provider_iotdevice";
     public static String PROVEEDOR_NAME = "name";
     public ArrayList<Proveedores>menuList;
-    private Bundle bundleID;
+    private ArrayList<Sensores> sensores;
     private int b;
     RecyclerView recyclerView;
     public MenuFragment() {
@@ -101,7 +111,7 @@ public class MenuFragment extends Fragment {
 
     private void goToOptionMenuSelected(ArrayList<Proveedores>MenuList, final int position) {
         String name = MenuList.get(position).getNameProvider();
-        Toast.makeText(getContext(), ""+name, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getContext(), ""+name, Toast.LENGTH_SHORT).show();
         SharedPreferences sharedPreferences = getContext().getSharedPreferences(LoginActivity.LOGIN_DATA, Context.MODE_PRIVATE);
         String userEmail = sharedPreferences.getString(LoginActivity.USER_MAIL,null);
         String userPass  = sharedPreferences.getString(LoginActivity.USER_PASSWORD, null);
@@ -109,14 +119,10 @@ public class MenuFragment extends Fragment {
        // MenuActivity menuActivity = new MenuActivity();
 
         if (MenuList.get(position).getNameProvider().equals("MobileIron")){
-           int i = getUserEndpoints(position, userEmail, userPass, name);
-           if (i == 0 ){
-               Intent intent = new Intent(getContext(), MainActivity.class);
-               intent.putExtras(bundleID);
-               startActivity(intent);
-           }
-           Log.e("Return",  " " + i);
-
+          int i = getUserEndpoints(position, userEmail, userPass, name);
+            if (i == 0 ){
+                mobileIronSpinner();
+            }
 
         }
         else if (MenuList.get(position).getNameProvider().equals("AirWatch")){
@@ -207,15 +213,16 @@ public class MenuFragment extends Fragment {
 
     private int getUserEndpoints(final int position, String mail, String pass, final String name){
 
-        Call<User<Error>> getUserEndpoints = UserService.getUserEndpoints().login(new LoginBody( mail, pass));
-        getUserEndpoints.enqueue(new Callback<User<Error>>() {
+        Call<User<Status>> getUserEndpoints = UserService.getUserEndpoints().login(new LoginBody( mail, pass));
+        getUserEndpoints.enqueue(new Callback<User<Status>>() {
             @Override
-            public void onResponse(Call<User<Error>> call, Response<User<Error>> response) {
+            public void onResponse(Call<User<Status>> call, Response<User<Status>> response) {
+
                 Log.e("Response", " " + response.body().getId_user());
                 if (response.code() == LoginActivity.SUCCESFUL_RESPONSE_CODE && response.isSuccessful()){
 
-                    if(response.body().getError()!= null){
-                        Toast.makeText(getContext(), "" + response.body().getError().getText(), Toast.LENGTH_SHORT).show();
+                    if(response.body().getStatus()!= null){
+                        Toast.makeText(getContext(), "" + response.body().getStatus().getDescription(), Toast.LENGTH_SHORT).show();
                         b=2;
                     }
                     else {
@@ -242,18 +249,7 @@ public class MenuFragment extends Fragment {
                                 intent.putExtras(bundle);
                                 startActivity(intent);
                             } else {
-                               /* Bundle bundle = new Bundle();
-                                bundle.putString(URL_ENDPOINTS_KEY, proveedores.get(position).getUrlEndpoints());
-                                bundle.putString(AWTENANTCODE_ENDPOINTS_KEY, proveedores.get(position).getAwtenantcodeEndpoints());
-                                bundle.putString(SERVER_USER_ENDPOINTS_KEY, proveedores.get(position).getServeruserEndpoints());
-                                bundle.putString(SERVER_PASSWORD_ENDPOINTS_KEY, proveedores.get(position).getServerpasswordEndpoints());
-                                bundle.putString(PROVEEDOR_NAME, name);
-                                bundle.putInt(ENDPOITS_PROVIDER_IOTDEVICE_KEY, two);
-                                bundle.putInt(ENDPOITS_USER_IOTDEVICE_KEY, one);
-                                Intent intent = new Intent(getContext(), UserEndpointsActivity.class);
-                                intent.putExtras(bundle);
-                                startActivity(intent);*/
-                                //bundleID.putInt(USER_ID, one);
+                                setUsersId(user.getId_user());
                                 b = 0;
                             }
 
@@ -271,7 +267,7 @@ public class MenuFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<User<Error>> call, Throwable t) {
+            public void onFailure(Call<User<Status>> call, Throwable t) {
                 t.getMessage();
                 Toast.makeText(getContext(), "Ha ocurrido un error intente mas tarde", Toast.LENGTH_SHORT).show();
                 b= 2;
@@ -279,4 +275,45 @@ public class MenuFragment extends Fragment {
         });
         return b;
     }
+
+    public static Integer getUsersId() {
+        return USERS_ID;
+    }
+
+    public static void setUsersId(Integer usersId) {
+        USERS_ID = usersId;
+    }
+
+    public void mobileIronSpinner(){
+        if(getUsersId() != null){
+            final Call<GetSensorsBody<Status>> getSensors = SensorsService.getSensors().getSensors(new SensorsBody(3));
+            getSensors.enqueue(new Callback<GetSensorsBody<Status>>() {
+                @Override
+                public void onResponse(Call<GetSensorsBody<Status>> call, Response<GetSensorsBody<Status>> response) {
+                    Log.e("GetSensorBody", " MenuActivity" +response.body().toString());
+                            if (response.isSuccessful()&& response.code() == LoginActivity.SUCCESFUL_RESPONSE_CODE){
+                                if(response.body().getStaus() !=null){
+                                    Toast.makeText(getContext(), "" + response.body().getStaus().getDescription(), Toast.LENGTH_SHORT).show();
+                                }
+                                else {
+                                    Log.d("Response", ""+  response.body().getSensores());
+                                    sensores = response.body().getSensores();
+                                    Bundle bundle = new Bundle();
+                                    Intent intent = new Intent(getContext(), MainActivity.class);
+                                    bundle.putParcelableArrayList(ARRAY_SENSORES, sensores);
+                                    intent.putExtras(bundle);
+                                    startActivity(intent);
+                                }
+                            }
+                }
+
+                @Override
+                public void onFailure(Call<GetSensorsBody<Status>> call, Throwable t) {
+                    Toast.makeText(getContext(), ""+ t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+    }
+
 }

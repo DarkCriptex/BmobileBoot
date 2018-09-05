@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Graphs</string>
+    <string name="app_name">Bmobile</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -7,6 +7,7 @@
     <string name="action_sign_in">Iniciar sesión</string>
     <string name="action_sign_in_short">Iniciar sesión</string>
     <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_url">This url is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>

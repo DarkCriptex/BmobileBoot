@@ -40,10 +40,10 @@ public class User <T>{
     @Nullable
     private String nameClient;
 
-    @SerializedName("Error")
+    @SerializedName("status")
     @Expose
     @Nullable
-    private T Error;
+    private T Status;
     @Nullable
     @Expose
     @SerializedName("proveedores")
@@ -61,14 +61,7 @@ public class User <T>{
         this.proveedores = proveedores;
     }
 
-    @Nullable
-    public T getError() {
-        return Error;
-    }
 
-    public void setError(@Nullable T Error) {
-        this.Error = Error;
-    }
 
     @Nullable
     public int getId_user() {
@@ -126,9 +119,17 @@ public class User <T>{
     public void setNameClient(String nameClient) {
         this.nameClient = nameClient;
     }
+
     @Nullable
+    public T getStatus() {
+        return Status;
+    }
 
+    public void setStatus(@Nullable T status) {
+        Status = status;
+    }
 
+    @Nullable
     @Override
     public String toString() {
         return "User{" +
@@ -139,7 +140,7 @@ public class User <T>{
                 ", emailUser='" + emailUser + '\'' +
                 ", nameLeveluser='" + nameLeveluser + '\'' +
                 ", nameClient='" + nameClient + '\'' +
-                ", error=" + Error +
+                ", error=" + Status +
                 ", proveedores='"  + '\'' + proveedores +
                 '}';
     }
